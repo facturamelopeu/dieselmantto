@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: whatsapp-bot-store
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SUPER_ADMIN_TOKEN
+        generateValue: true
+      - key: OLLAMA_URL
+        value: ""

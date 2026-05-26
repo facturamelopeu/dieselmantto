@@ -1,0 +1,110 @@
+[
+  {
+    "id": "gps-001",
+    "name": "Rastreador GPS para Camiones",
+    "category": "GPS y Rastreo",
+    "description": "Dispositivo GPS de alta precisión para seguimiento en tiempo real de camiones y flotas. Compatible con redes 4G/LTE.",
+    "price": "Consultar",
+    "keywords": ["gps", "rastreador", "camion", "flota", "rastreo", "seguimiento", "localizador"],
+    "source": "manual"
+  },
+  {
+    "id": "gps-002",
+    "name": "Rastreador GPS para Maquinaria Pesada",
+    "category": "GPS y Rastreo",
+    "description": "Rastreador GPS robusto diseñado para excavadoras, retroexcavadoras, grúas y equipo pesado. Resistente a vibraciones y temperatura extrema.",
+    "price": "Consultar",
+    "keywords": ["gps", "maquinaria", "excavadora", "retroexcavadora", "grua", "equipo pesado", "rastreo"],
+    "source": "manual"
+  },
+  {
+    "id": "cam-001",
+    "name": "Dashcam Dual para Camión (Frontal + Trasera)",
+    "category": "Cámaras y Video",
+    "description": "Cámara de tablero con grabación simultánea frontal y trasera en Full HD. Visión nocturna, detección de colisión y almacenamiento en nube.",
+    "price": "Consultar",
+    "keywords": ["camara", "dashcam", "video", "grabacion", "vigilancia", "camion", "seguridad"],
+    "source": "manual"
+  },
+  {
+    "id": "cam-002",
+    "name": "Sistema de Cámaras de Retroceso 360°",
+    "category": "Cámaras y Video",
+    "description": "Kit de 4 cámaras para visión perimetral completa en camiones y maquinaria pesada. Reduce puntos ciegos y previene accidentes.",
+    "price": "Consultar",
+    "keywords": ["camara", "retroceso", "360", "puntos ciegos", "maniobra", "seguridad", "camion"],
+    "source": "manual"
+  },
+  {
+    "id": "tpms-001",
+    "name": "Sistema TPMS para Camiones (10 ruedas)",
+    "category": "Monitoreo de Llantas",
+    "description": "Monitor de presión y temperatura de llantas en tiempo real para camiones de 10 ruedas. Alarmas configurables y display en cabina.",
+    "price": "Consultar",
+    "keywords": ["tpms", "presion", "llanta", "neumatico", "temperatura", "monitoreo", "camion", "10 ruedas"],
+    "source": "manual"
+  },
+  {
+    "id": "tpms-002",
+    "name": "Sistema TPMS para Maquinaria Pesada",
+    "category": "Monitoreo de Llantas",
+    "description": "Sensores de presión de llantas para equipo pesado: motoconformadoras, compactadoras, cargadores frontales. Alerta de reventones.",
+    "price": "Consultar",
+    "keywords": ["tpms", "presion", "llanta", "maquinaria", "motoconformadora", "compactadora", "cargador"],
+    "source": "manual"
+  },
+  {
+    "id": "diag-001",
+    "name": "Scanner Diagnóstico OBD-II Universal",
+    "category": "Diagnóstico y Escáneres",
+    "description": "Escáner de diagnóstico automotriz profesional compatible con OBD-II para camiones ligeros y medianos. Lee y borra códigos de falla.",
+    "price": "Consultar",
+    "keywords": ["scanner", "diagnostico", "obd", "codigos", "falla", "motor", "electronico"],
+    "source": "manual"
+  },
+  {
+    "id": "diag-002",
+    "name": "Scanner Diagnóstico J1939 para Camión Pesado",
+    "category": "Diagnóstico y Escáneres",
+    "description": "Herramienta de diagnóstico profesional con protocolo J1939/J1708 para camiones pesados y maquinaria. Compatible con Caterpillar, Cummins, Detroit.",
+    "price": "Consultar",
+    "keywords": ["scanner", "diagnostico", "j1939", "caterpillar", "cummins", "detroit", "camion pesado", "motor diesel"],
+    "source": "manual"
+  },
+  {
+    "id": "fuel-001",
+    "name": "Sensor de Nivel de Combustible con Telemetría",
+    "category": "Control de Combustible",
+    "description": "Sensor ultrasónico para monitoreo remoto del nivel de combustible en tanques de camiones y maquinaria. Detecta robos y fugas. Integración con plataforma web.",
+    "price": "Consultar",
+    "keywords": ["combustible", "sensor", "nivel", "diesel", "telemetria", "monitoreo", "antirobo", "fuga"],
+    "source": "manual"
+  },
+  {
+    "id": "fleet-001",
+    "name": "Plataforma de Gestión de Flota (Software)",
+    "category": "Software de Flota",
+    "description": "Software SaaS para administración integral de flotas: rutas, mantenimiento preventivo, alertas, reportes de rendimiento y consumo.",
+    "price": "Desde $X/mes",
+    "keywords": ["software", "flota", "gestion", "mantenimiento", "reporte", "ruta", "rendimiento", "consumo"],
+    "source": "manual"
+  },
+  {
+    "id": "eco-001",
+    "name": "Monitor de Conducción Eficiente (Ecodriving)",
+    "category": "Eficiencia y Seguridad",
+    "description": "Dispositivo que analiza el comportamiento del conductor: frenadas bruscas, aceleraciones, ralentí excesivo. Reportes para reducir consumo de combustible.",
+    "price": "Consultar",
+    "keywords": ["ecodriving", "conduccion", "eficiencia", "combustible", "conductor", "seguridad", "comportamiento"],
+    "source": "manual"
+  },
+  {
+    "id": "adblue-001",
+    "name": "Sensor Monitor AdBlue / DEF",
+    "category": "Diagnóstico y Escáneres",
+    "description": "Monitor de nivel de fluido AdBlue (DEF) para sistemas SCR en camiones Euro 5 y Euro 6. Alerta antes de apagado de emergencia.",
+    "price": "Consultar",
+    "keywords": ["adblue", "def", "scr", "euro5", "euro6", "emision", "sensor", "camion"],
+    "source": "manual"
+  }
+]
