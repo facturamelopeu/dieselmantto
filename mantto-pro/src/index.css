@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+  html,
+  body,
+  #root {
+    @apply h-full;
+  }
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+    overflow-x: hidden;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+    border: 2px solid #0a0f1c;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-3;
+  }
+}
+
+@layer components {
+  /* Inputs */
+  .input {
+    @apply w-full rounded-[10px] bg-bg-soft border border-border text-ink text-sm px-3 py-2.5 transition-colors;
+  }
+  .input:focus {
+    @apply outline-none border-brand;
+    box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.25);
+  }
+  .label {
+    @apply block text-xs text-ink-dim mb-1.5 font-medium;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center gap-2 rounded-[10px] font-semibold text-[13px] px-4 py-2.5 transition-all border border-transparent;
+  }
+  .btn-brand {
+    @apply text-white;
+    background: linear-gradient(135deg, #2f6bff, #1d4ed8);
+    box-shadow: 0 8px 22px -10px rgba(47, 107, 255, 0.5);
+  }
+  .btn-brand:hover {
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    @apply bg-surface border-border text-ink-dim;
+  }
+  .btn-ghost:hover {
+    @apply text-ink border-brand;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  /* Card */
+  .card {
+    @apply bg-surface border border-border rounded-xl2 shadow-card;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full text-[11.5px] font-semibold px-2.5 py-1 whitespace-nowrap;
+  }
+  .bdot {
+    @apply w-1.5 h-1.5 rounded-full;
+  }
+
+  /* Table */
+  .tbl {
+    @apply w-full border-collapse text-[13px];
+  }
+  .tbl thead th {
+    @apply text-left px-4 py-3 text-ink-faint font-semibold text-[11px] uppercase tracking-wider border-b border-border whitespace-nowrap;
+  }
+  .tbl tbody td {
+    @apply px-4 py-3 border-b border-border-soft text-ink-dim align-middle;
+  }
+  .tbl tbody tr {
+    @apply transition-colors;
+  }
+  .tbl tbody tr:hover {
+    @apply bg-surface-2;
+  }
+  .tbl tbody tr:last-child td {
+    @apply border-b-0;
+  }
+}
