@@ -80,6 +80,9 @@ export interface WhatsAppMessage {
   text: string;
   messageId: string;
   name?: string;
+  mediaType?: 'image' | 'document' | 'audio' | 'video';
+  mediaUrl?: string;
+  mediaName?: string;
 }
 
 export interface InteractiveButton {

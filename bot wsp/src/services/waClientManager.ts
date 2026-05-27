@@ -1,8 +1,10 @@
-import { Client, LocalAuth } from 'whatsapp-web.js';
+import { Client, LocalAuth, MessageMedia } from 'whatsapp-web.js';
 import path from 'path';
+import fs from 'fs';
 import QRCode from 'qrcode';
 import { Tenant, WhatsAppMessage } from '../types';
 import * as tenantService from './tenantService';
+import type { MediaType } from './chatService';
 
 type Status = 'initializing' | 'qr' | 'connected' | 'disconnected';
 
@@ -19,6 +21,21 @@ export async function sendText(tenantId: string, to: string, text: string): Prom
   if (!entry || entry.status !== 'connected') throw new Error('WhatsApp no conectado');
   const chatId = to.includes('@') ? to : `${to}@c.us`;
   await entry.client.sendMessage(chatId, text);
+}
+
+export async function sendMedia(
+  tenantId: string,
+  to: string,
+  buffer: Buffer,
+  mimetype: string,
+  filename: string,
+  caption?: string
+): Promise<void> {
+  const entry = entries.get(tenantId);
+  if (!entry || entry.status !== 'connected') throw new Error('WhatsApp no conectado');
+  const chatId = to.includes('@') ? to : `${to}@c.us`;
+  const media = new MessageMedia(mimetype, buffer.toString('base64'), filename);
+  await entry.client.sendMessage(chatId, media, caption ? { caption } : {});
 }
 
 export function getStatus(tenantId: string): Status {
@@ -100,14 +117,54 @@ export function initClient(tenant: Tenant): void {
     const currentTenant = tenantService.findById(tenant.id);
     if (!currentTenant) return;
 
+    const senderName: string | undefined = (msg as any)._data?.notifyName || undefined;
+
+    // ── Handle incoming media ────────────────────────────────────────────────
+    if (msg.hasMedia) {
+      try {
+        const media = await msg.downloadMedia();
+        if (media) {
+          const ext = (media.mimetype.split('/')[1] ?? 'bin').split(';')[0];
+          const safeId = msg.id._serialized.replace(/[^a-zA-Z0-9_-]/g, '_');
+          const filename = `${safeId}.${ext}`;
+          const uploadsDir = path.join(__dirname, '../../public/uploads/chat', tenant.id);
+          if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+          fs.writeFileSync(path.join(uploadsDir, filename), Buffer.from(media.data, 'base64'));
+          const mediaUrl = `/uploads/chat/${tenant.id}/${filename}`;
+
+          let mediaType: MediaType;
+          if (media.mimetype.startsWith('image/')) mediaType = 'image';
+          else if (media.mimetype.startsWith('audio/')) mediaType = 'audio';
+          else if (media.mimetype.startsWith('video/')) mediaType = 'video';
+          else mediaType = 'document';
+
+          import('./chatService').then(({ addMessage }) => {
+            addMessage(tenant.id, msg.from, {
+              text: msg.body || '',
+              direction: 'in',
+              ts: Date.now(),
+              mediaType,
+              mediaUrl,
+              mediaName: media.filename || filename,
+            }, senderName);
+          });
+
+          // Only forward text (caption) to bot handler if there is one
+          if (!msg.body) return;
+        }
+      } catch (err) {
+        console.error(`[wa][${tenant.storeName}] Error descargando media:`, (err as Error).message);
+      }
+    }
+    // ── End media handling ──────────────────────────────────────────────────
+
     const waMsg: WhatsAppMessage = {
       from: msg.from,
       text: msg.body,
       messageId: msg.id._serialized,
-      name: (msg as any)._data?.notifyName || undefined,
+      name: senderName,
     };
 
-    // Lazy import to avoid circular dependency
     import('../handlers/messageHandler').then(({ handleMessage }) => {
       handleMessage(currentTenant, waMsg).catch((err) => {
         console.error(`[wa][${tenant.storeName}] Error:`, err.message);

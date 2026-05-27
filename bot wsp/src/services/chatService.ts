@@ -1,10 +1,15 @@
 import { Response } from 'express';
 
+export type MediaType = 'image' | 'document' | 'audio' | 'video';
+
 export interface ChatMessage {
   id: string;
   text: string;
   direction: 'in' | 'out';
   ts: number;
+  mediaType?: MediaType;
+  mediaUrl?: string;
+  mediaName?: string;
 }
 
 export interface Conversation {

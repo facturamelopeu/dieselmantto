@@ -76,6 +76,31 @@
     .chat-send-btn { background: var(--primary); color: var(--on-primary); border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .chat-send-btn:hover { background: var(--primary-hover); }
     .chat-empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #475569; gap: 10px; }
+    /* Attach button */
+    .chat-attach-btn { background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color .15s; }
+    .chat-attach-btn:hover { color: var(--primary); }
+    /* Attach preview bar */
+    .chat-attach-bar { padding: 8px 12px; border-top: 1px solid #334155; background: #162032; display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; }
+    .chat-attach-bar img { width: 52px; height: 52px; object-fit: cover; border-radius: 6px; border: 1px solid #334155; }
+    .chat-attach-doc { display: flex; align-items: center; gap: 8px; background: #0f172a; border-radius: 8px; padding: 8px 12px; border: 1px solid #334155; }
+    .chat-attach-doc i { font-size: 22px; color: #60a5fa; }
+    .chat-attach-meta { flex: 1; min-width: 0; }
+    .chat-attach-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #e2e8f0; }
+    .chat-attach-size { font-size: 11px; color: #64748b; }
+    .chat-caption-input { flex: 1; background: transparent; border: none; outline: none; color: #e2e8f0; font-size: 13px; font-family: inherit; placeholder-color: #475569; }
+    /* Media bubbles */
+    .chat-media-img { max-width: 240px; max-height: 200px; border-radius: 8px; display: block; cursor: zoom-in; object-fit: cover; }
+    .chat-media-doc { display: flex; align-items: center; gap: 8px; padding: 4px 0; text-decoration: none; }
+    .chat-media-doc i { font-size: 20px; }
+    .chat-media-doc span { font-size: 13px; text-decoration: underline; }
+    .chat-bubble.in .chat-media-doc { color: #93c5fd; }
+    .chat-bubble.out .chat-media-doc { color: var(--on-primary); }
+    .chat-media-audio { width: 200px; height: 36px; accent-color: var(--primary); }
+    .chat-media-video { max-width: 240px; border-radius: 8px; }
+    /* Lightbox */
+    #imgLightbox { position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 2000; display: none; align-items: center; justify-content: center; cursor: zoom-out; }
+    #imgLightbox.open { display: flex; }
+    #imgLightbox img { max-width: 90vw; max-height: 90vh; border-radius: 10px; object-fit: contain; }
     .bot-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 700; white-space: nowrap; }
     .bot-on { background: var(--primary-dim); color: var(--primary); }
     .bot-off { background: #450a0a; color: #fca5a5; }
@@ -283,10 +308,34 @@
                 </div>
               </div>
               <div class="chat-messages" id="chat-messages"></div>
+              <!-- Attach preview bar (hidden until file selected) -->
+              <div class="chat-attach-bar" id="chatAttachBar" style="display:none">
+                <img id="chatAttachImg" src="" alt="" style="display:none" />
+                <div class="chat-attach-doc" id="chatAttachDoc" style="display:none">
+                  <i class="bi bi-file-earmark-fill" id="chatAttachDocIcon"></i>
+                  <div class="chat-attach-meta">
+                    <div class="chat-attach-name" id="chatAttachName"></div>
+                    <div class="chat-attach-size" id="chatAttachSize"></div>
+                  </div>
+                </div>
+                <input class="chat-caption-input" id="chatCaption" placeholder="Añadir descripción (opcional)..." />
+                <button class="btn btn-sm btn-primary-custom" onclick="sendMedia()" id="chatSendMediaBtn" style="flex-shrink:0">
+                  <i class="bi bi-send-fill"></i>
+                </button>
+                <button class="chat-attach-btn" onclick="clearChatAttach()" title="Cancelar">
+                  <i class="bi bi-x-lg" style="font-size:16px"></i>
+                </button>
+              </div>
               <div class="chat-footer">
+                <input type="file" id="chatFileInput" class="d-none"
+                  accept="image/*,audio/*,video/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                  onchange="handleChatAttach(this)" />
+                <button class="chat-attach-btn" onclick="document.getElementById('chatFileInput').click()" title="Adjuntar archivo">
+                  <i class="bi bi-paperclip"></i>
+                </button>
                 <textarea class="chat-input" id="chat-input" rows="1"
                   placeholder="Responder como agente..." onkeydown="chatKeydown(event)" oninput="autoResize(this)"></textarea>
-                <button class="chat-send-btn" onclick="sendReply()">&#10148;</button>
+                <button class="chat-send-btn" onclick="sendReply()"><i class="bi bi-send-fill"></i></button>
               </div>
             </div>
           </div>
@@ -742,6 +791,10 @@
 </div>
 
 <div id="toast"></div>
+<!-- Image lightbox -->
+<div id="imgLightbox" onclick="this.classList.remove('open')">
+  <img id="imgLightboxSrc" src="" alt="" />
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@coreui/coreui@5/dist/js/coreui.bundle.min.js"></script>
 <script>
@@ -1226,7 +1279,55 @@ async function selectConv(phone){
 function chatBack(){document.getElementById('chatSidebar').classList.remove('mobile-hidden');document.getElementById('chat-thread').style.display='none';document.getElementById('chat-select-hint').style.display='';chatPhone=null;}
 function renderMessages(msgs){const el=document.getElementById('chat-messages');el.innerHTML=(msgs||[]).map(m=>bubbleHTML(m)).join('');el.scrollTop=el.scrollHeight;}
 function appendMessage(msg){const el=document.getElementById('chat-messages');el.insertAdjacentHTML('beforeend',bubbleHTML(msg));el.scrollTop=el.scrollHeight;}
-function bubbleHTML(msg){const d=new Date(msg.ts);const time=d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});return`<div class="chat-bubble-wrap ${msg.direction}"><div class="chat-bubble ${msg.direction}">${esc(msg.text)}</div><div class="chat-bubble-time">${time}</div></div>`;}
+
+function mediaContent(msg){
+  if(!msg.mediaType) return msg.text?esc(msg.text):'';
+  let inner='';
+  if(msg.mediaType==='image'){inner=`<img class="chat-media-img" src="${esc(msg.mediaUrl)}" alt="imagen" onclick="openLightbox('${esc(msg.mediaUrl)}')" loading="lazy"/>`;}
+  else if(msg.mediaType==='audio'){inner=`<audio class="chat-media-audio" controls src="${esc(msg.mediaUrl)}"></audio>`;}
+  else if(msg.mediaType==='video'){inner=`<video class="chat-media-video" controls src="${esc(msg.mediaUrl)}"></video>`;}
+  else{const ext=(msg.mediaName||'').split('.').pop()?.toLowerCase()||'';const icon=ext==='pdf'?'bi-file-earmark-pdf':ext.match(/docx?/)?'bi-file-earmark-word':ext.match(/xlsx?/)?'bi-file-earmark-excel':'bi-file-earmark-arrow-down';inner=`<a class="chat-media-doc" href="${esc(msg.mediaUrl)}" download="${esc(msg.mediaName||'archivo')}" target="_blank"><i class="bi ${icon}"></i><span>${esc(msg.mediaName||'Archivo')}</span></a>`;}
+  if(msg.text) inner+=`<div style="margin-top:5px;font-size:13px;white-space:pre-wrap">${esc(msg.text)}</div>`;
+  return inner;
+}
+function bubbleHTML(msg){
+  const d=new Date(msg.ts);const time=d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+  const content=msg.mediaType?mediaContent(msg):(msg.text?esc(msg.text):'');
+  return`<div class="chat-bubble-wrap ${msg.direction}"><div class="chat-bubble ${msg.direction}">${content}</div><div class="chat-bubble-time">${time}</div></div>`;
+}
+function openLightbox(url){document.getElementById('imgLightboxSrc').src=url;document.getElementById('imgLightbox').classList.add('open');}
+
+// ── Chat attachment ─────────────────────────────────────────────────────────
+let chatAttachFile=null;
+const DOC_ICONS={pdf:'bi-file-earmark-pdf-fill',doc:'bi-file-earmark-word-fill',docx:'bi-file-earmark-word-fill',xls:'bi-file-earmark-excel-fill',xlsx:'bi-file-earmark-excel-fill',mp3:'bi-file-earmark-music-fill',ogg:'bi-file-earmark-music-fill',mp4:'bi-file-earmark-play-fill'};
+function handleChatAttach(input){
+  if(!input.files[0])return;
+  chatAttachFile=input.files[0];
+  const file=chatAttachFile;
+  document.getElementById('chatAttachBar').style.display='';
+  document.getElementById('chatCaption').value='';
+  const img=document.getElementById('chatAttachImg');
+  const doc=document.getElementById('chatAttachDoc');
+  if(file.type.startsWith('image/')){img.src=URL.createObjectURL(file);img.style.display='';doc.style.display='none';}
+  else{img.style.display='none';doc.style.display='';const ext=file.name.split('.').pop().toLowerCase();document.getElementById('chatAttachDocIcon').className='bi '+(DOC_ICONS[ext]||'bi-file-earmark-fill');document.getElementById('chatAttachName').textContent=file.name;document.getElementById('chatAttachSize').textContent=(file.size/1024).toFixed(0)+' KB';}
+}
+function clearChatAttach(){
+  chatAttachFile=null;document.getElementById('chatFileInput').value='';
+  document.getElementById('chatAttachBar').style.display='none';
+  document.getElementById('chatAttachImg').style.display='none';
+}
+async function sendMedia(){
+  if(!chatAttachFile||!chatPhone)return;
+  const btn=document.getElementById('chatSendMediaBtn');btn.disabled=true;
+  const caption=document.getElementById('chatCaption').value.trim();
+  const fd=new FormData();fd.append('file',chatAttachFile,chatAttachFile.name);if(caption)fd.append('caption',caption);
+  try{
+    const r=await fetch('/admin/chat/send-media/'+encodeURIComponent(chatPhone),{method:'POST',headers:{Authorization:'Bearer '+token},body:fd});
+    const d=await r.json();if(!r.ok)throw new Error(d.error||'Error al enviar');
+    clearChatAttach();
+  }catch(ex){toast(ex.message,'error');}
+  btn.disabled=false;
+}
 function updateBotBadge(enabled){const badge=document.getElementById('chat-bot-badge');badge.textContent=enabled?'Bot ON':'Bot OFF';badge.className='bot-badge '+(enabled?'bot-on':'bot-off');}
 async function toggleBot(){const enabled=document.getElementById('chat-bot-toggle').checked;updateBotBadge(enabled);const conv=chatConvs.find(c=>c.phone===chatPhone);if(conv)conv.botEnabled=enabled;renderConvList();try{await api('/admin/chat/bot/'+encodeURIComponent(chatPhone),{method:'POST',body:JSON.stringify({enabled})});}catch(ex){toast(ex.message,'error');}}
 async function assignSeller(){if(!chatPhone)return;const seller=document.getElementById('chat-seller-select').value||null;const conv=chatConvs.find(c=>c.phone===chatPhone);if(conv)conv.assignedTo=seller||undefined;renderConvList();try{await api('/admin/chat/assign/'+encodeURIComponent(chatPhone),{method:'POST',body:JSON.stringify({seller})});toast(seller?`Asignado a ${seller}`:'Asignación removida');}catch(ex){toast(ex.message,'error');}}
