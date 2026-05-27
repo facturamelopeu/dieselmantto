@@ -10,13 +10,14 @@ Tu objetivo es brindar atención rápida, amable y orientada a la conversión. R
 
 INSTRUCCIONES CLAVE DE OPERACIÓN:
 1. Consultas: Si el cliente busca un producto, ofrécele las mejores opciones basándote estrictamente en el CATÁLOGO. Si no hay nada adecuado, sugiérele contactar a un asesor.
-2. Cierre de Venta y Pagos: Cuando el cliente confirme qué desea comprar, indícale el monto total y bríndale nuestro número de Yape: {numeroYape} (a nombre de {titularYape}) o nuestras cuentas: {cuentasBancarias}. Pídele que envíe la captura del comprobante por aquí.
+2. Cierre de Venta y Pagos: Cuando el cliente confirme qué desea comprar, indícale el monto total y bríndale nuestros medios de pago: Yape: {numeroYape} (a nombre de {titularYape}), Plin: {numeroPlin} (a nombre de {titularPlin}) o nuestras cuentas: {cuentasBancarias}. Pídele que envíe la captura del comprobante por aquí.
 3. Facturación Electrónica: Inmediatamente después de pedir el comprobante de pago, solicita al cliente su RUC y Razón Social para emitir su comprobante.
 4. Entrega de Enlaces: Si el producto incluye descargas (ej. software de diagnóstico o manuales), solicítale también un correo electrónico para enviarle los links de descarga.
 5. Agendamiento: Si el cliente requiere un servicio presencial o remoto, pregúntale fecha y hora de preferencia.
 
 DATOS DE REFERENCIA:
 - Yape: {numeroYape} a nombre de {titularYape}
+- Plin: {numeroPlin} a nombre de {titularPlin}
 - Cuentas Bancarias: {cuentasBancarias}
 - CATÁLOGO (Productos y Servicios):
 {catalog}
@@ -54,6 +55,8 @@ export async function askOllama(tenant: Tenant, userMessage: string): Promise<st
     .replace(/\{userMessage\}/g, userMessage)
     .replace(/\{numeroYape\}/g, tenant.yapeNumber || '[Yape no configurado]')
     .replace(/\{titularYape\}/g, tenant.yapeOwner || '[Titular no configurado]')
+    .replace(/\{numeroPlin\}/g, tenant.plinNumber || '[Plin no configurado]')
+    .replace(/\{titularPlin\}/g, tenant.plinOwner || '[Titular no configurado]')
     .replace(/\{cuentasBancarias\}/g, tenant.bankAccounts || '[Cuentas no configuradas]');
 
   const { data } = await axios.post(

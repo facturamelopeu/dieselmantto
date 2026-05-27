@@ -35,6 +35,10 @@ router.get('/settings', (req: AuthRequest, res: Response) => {
     phoneNumberId: t.phoneNumberId,
     yapeNumber: t.yapeNumber ?? '',
     yapeOwner: t.yapeOwner ?? '',
+    yapeQrUrl: t.yapeQrUrl ?? '',
+    plinNumber: t.plinNumber ?? '',
+    plinOwner: t.plinOwner ?? '',
+    plinQrUrl: t.plinQrUrl ?? '',
     bankAccounts: t.bankAccounts ?? '',
     createdAt: t.createdAt,
   });
@@ -42,7 +46,7 @@ router.get('/settings', (req: AuthRequest, res: Response) => {
 
 router.put('/settings', async (req: AuthRequest, res: Response) => {
   const { username, storeName, websiteUrl, password, whatsappToken, phoneNumberId, verifyToken, logoUrl,
-          yapeNumber, yapeOwner, bankAccounts } =
+          yapeNumber, yapeOwner, plinNumber, plinOwner, bankAccounts } =
     req.body as Record<string, string>;
 
   const updates: Partial<typeof req.tenant> = {};
@@ -56,6 +60,8 @@ router.put('/settings', async (req: AuthRequest, res: Response) => {
   if (password) updates.passwordHash = await hashPassword(password);
   if (yapeNumber !== undefined) updates.yapeNumber = yapeNumber;
   if (yapeOwner !== undefined) updates.yapeOwner = yapeOwner;
+  if (plinNumber !== undefined) updates.plinNumber = plinNumber;
+  if (plinOwner !== undefined) updates.plinOwner = plinOwner;
   if (bankAccounts !== undefined) updates.bankAccounts = bankAccounts;
 
   const updated = tenantService.update(req.tenant!.id, updates);
@@ -119,6 +125,25 @@ router.post('/catalog/:id/image', upload.single('image'), (req: AuthRequest, res
   const imageUrlStored = `/uploads/${filename}`;
   tenantService.addProduct(tenant.id, { ...existing, imageUrl: imageUrlStored });
   res.json({ ok: true, imageUrl });
+});
+
+// POST /admin/payment/qr/:type  — upload Yape or Plin QR as WebP
+router.post('/payment/qr/:type', upload.single('image'), (req: AuthRequest, res: Response) => {
+  const type = req.params.type as 'yape' | 'plin';
+  if (type !== 'yape' && type !== 'plin') { res.status(400).json({ error: 'Tipo inválido' }); return; }
+  if (!req.file) { res.status(400).json({ error: 'No se recibió imagen' }); return; }
+
+  const tenant = req.tenant!;
+  const uploadsDir = path.join(__dirname, '../../public/uploads');
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+  const filename = `${tenant.id}-${type}-qr.webp`;
+  fs.writeFileSync(path.join(uploadsDir, filename), req.file.buffer);
+
+  const qrUrl = `/uploads/${filename}`;
+  const field = type === 'yape' ? 'yapeQrUrl' : 'plinQrUrl';
+  tenantService.update(tenant.id, { [field]: qrUrl });
+  res.json({ ok: true, qrUrl: `${qrUrl}?v=${Date.now()}` });
 });
 
 // ── FAQs ─────────────────────────────────────────────────────────────────────

@@ -60,6 +60,10 @@ export interface Tenant {
   verifyToken: string;
   yapeNumber?: string;
   yapeOwner?: string;
+  yapeQrUrl?: string;
+  plinNumber?: string;
+  plinOwner?: string;
+  plinQrUrl?: string;
   bankAccounts?: string;
   catalog: Product[];
   faqs: FAQ[];

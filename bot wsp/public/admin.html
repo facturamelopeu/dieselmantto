@@ -91,6 +91,19 @@
     .form-input:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 .2rem var(--primary-dim) !important; }
     /* Switch accent */
     .form-check-input:checked { background-color: var(--primary) !important; border-color: var(--primary) !important; }
+    /* ── Text contrast improvements ── */
+    body { color: #e2e8f0 !important; }
+    .card-dark, .card-dark .card-body { color: #e2e8f0 !important; }
+    .card-dark .card-header { color: #f1f5f9 !important; font-weight: 600; }
+    h4, h5, h6 { color: #f1f5f9 !important; }
+    .form-label { color: #cbd5e1 !important; font-weight: 500; }
+    .form-text, .form-text.text-secondary { color: #94a3b8 !important; }
+    label { color: #cbd5e1 !important; }
+    p { color: #cbd5e1 !important; }
+    p.text-secondary, small.text-secondary, .small.text-secondary, span.text-secondary { color: #94a3b8 !important; }
+    table.table-dark td { color: #e2e8f0 !important; }
+    table.table-dark th { color: #94a3b8 !important; }
+    .text-secondary { color: #94a3b8 !important; }
     /* Stat number */
     .stat-num { font-size: 2.2rem; font-weight: 800; color: var(--primary); line-height: 1; }
     /* Seller avatar */
@@ -375,7 +388,7 @@
         <div class="card card-dark mb-3">
           <div class="card-header fw-semibold small">Prompt del sistema</div>
           <div class="card-body">
-            <p class="text-secondary small mb-2">Variables: <code style="color:#a78bfa">{storeName}</code> <code style="color:#a78bfa">{catalog}</code> <code style="color:#a78bfa">{userMessage}</code> <code style="color:#a78bfa">{numeroYape}</code> <code style="color:#a78bfa">{titularYape}</code> <code style="color:#a78bfa">{cuentasBancarias}</code></p>
+            <p class="text-secondary small mb-2">Variables: <code style="color:#a78bfa">{storeName}</code> <code style="color:#a78bfa">{catalog}</code> <code style="color:#a78bfa">{userMessage}</code> <code style="color:#a78bfa">{numeroYape}</code> <code style="color:#a78bfa">{titularYape}</code> <code style="color:#a78bfa">{numeroPlin}</code> <code style="color:#a78bfa">{titularPlin}</code> <code style="color:#a78bfa">{cuentasBancarias}</code></p>
             <textarea class="form-control form-input" id="ai_prompt" rows="7"
               style="font-family:monospace;font-size:13px;resize:vertical"
               placeholder="Eres el asistente de {storeName}..."></textarea>
@@ -496,21 +509,67 @@
             <i class="bi bi-credit-card me-2" style="color:var(--primary)"></i>Datos de pago (Yape / Banco)
           </div>
           <div class="card-body">
-            <p class="text-secondary small mb-3">Se usan en el prompt de la IA para indicar cómo pagar al cliente</p>
-            <div class="row g-3">
-              <div class="col-12 col-md-6">
-                <label class="form-label text-secondary small mb-1">Número Yape</label>
+            <p class="text-secondary small mb-3">Se usan en el prompt de la IA para indicar cómo pagar al cliente. Sube el QR de cada plataforma.</p>
+
+            <!-- Yape -->
+            <div class="row g-3 mb-3">
+              <div class="col-12"><p class="fw-semibold mb-1" style="color:#4ade80;font-size:13px"><i class="bi bi-phone-fill me-1"></i>Yape</p></div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small mb-1">Número Yape</label>
                 <input type="text" class="form-control form-control-sm form-input" id="s_yapeNumber" placeholder="987654321" />
               </div>
-              <div class="col-12 col-md-6">
-                <label class="form-label text-secondary small mb-1">Titular Yape</label>
+              <div class="col-12 col-md-4">
+                <label class="form-label small mb-1">Titular Yape</label>
                 <input type="text" class="form-control form-control-sm form-input" id="s_yapeOwner" placeholder="Juan Pérez" />
               </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small mb-1">QR Yape <span class="text-secondary" style="font-size:10px">(WebP ≤300KB)</span></label>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <img id="yapeQrPreview" src="" alt="" style="display:none;width:48px;height:48px;border-radius:6px;border:1px solid #334155;object-fit:cover" />
+                  <label class="btn btn-sm btn-outline-secondary" for="yapeQrInput" style="cursor:pointer;margin:0;font-size:12px">
+                    <i class="bi bi-qr-code me-1"></i>Subir QR
+                  </label>
+                  <input type="file" id="yapeQrInput" accept="image/*" class="d-none" onchange="uploadPaymentQr('yape',this)" />
+                  <span id="yapeQrInfo" class="text-secondary" style="font-size:11px"></span>
+                </div>
+              </div>
+            </div>
+
+            <hr style="border-color:#334155;margin:4px 0 14px" />
+
+            <!-- Plin -->
+            <div class="row g-3 mb-3">
+              <div class="col-12"><p class="fw-semibold mb-1" style="color:#60a5fa;font-size:13px"><i class="bi bi-phone-fill me-1"></i>Plin</p></div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small mb-1">Número Plin</label>
+                <input type="text" class="form-control form-control-sm form-input" id="s_plinNumber" placeholder="987654321" />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small mb-1">Titular Plin</label>
+                <input type="text" class="form-control form-control-sm form-input" id="s_plinOwner" placeholder="Juan Pérez" />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small mb-1">QR Plin <span class="text-secondary" style="font-size:10px">(WebP ≤300KB)</span></label>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <img id="plinQrPreview" src="" alt="" style="display:none;width:48px;height:48px;border-radius:6px;border:1px solid #334155;object-fit:cover" />
+                  <label class="btn btn-sm btn-outline-secondary" for="plinQrInput" style="cursor:pointer;margin:0;font-size:12px">
+                    <i class="bi bi-qr-code me-1"></i>Subir QR
+                  </label>
+                  <input type="file" id="plinQrInput" accept="image/*" class="d-none" onchange="uploadPaymentQr('plin',this)" />
+                  <span id="plinQrInfo" class="text-secondary" style="font-size:11px"></span>
+                </div>
+              </div>
+            </div>
+
+            <hr style="border-color:#334155;margin:4px 0 14px" />
+
+            <!-- Cuentas bancarias -->
+            <div class="row g-3">
               <div class="col-12">
-                <label class="form-label text-secondary small mb-1">Cuentas bancarias</label>
+                <label class="form-label small mb-1">Cuentas bancarias</label>
                 <textarea class="form-control form-control-sm form-input" id="s_bankAccounts" rows="3"
                   placeholder="BCP: 123-456789-0-12 CCI: 00212300456789012333&#10;Interbank: 200-3456789012-34"></textarea>
-                <div class="form-text text-secondary">Una cuenta por línea o separadas por coma</div>
+                <div class="form-text">Una cuenta por línea</div>
               </div>
             </div>
             <button class="btn btn-sm btn-primary-custom mt-3" onclick="saveSettings('payment')">
@@ -998,6 +1057,31 @@ async function waLogout() { if(!confirm('¿Desconectar?')) return; await api('/a
 function startWaPolling() { stopWaPolling(); waPollingTimer=setInterval(loadWaStatus,5000); }
 function stopWaPolling() { if(waPollingTimer){clearInterval(waPollingTimer);waPollingTimer=null;} }
 
+// ── PAYMENT QR UPLOAD ──────────────────────────────────────────────────────
+async function uploadPaymentQr(type, input) {
+  if (!input.files[0]) return;
+  const infoEl = document.getElementById(type+'QrInfo');
+  const previewEl = document.getElementById(type+'QrPreview');
+  infoEl.textContent = 'Convirtiendo...';
+  const blob = await toWebP(input.files[0]);
+  infoEl.textContent = 'Subiendo...';
+  const fd = new FormData();
+  fd.append('image', blob, type+'-qr.webp');
+  try {
+    const res = await fetch('/admin/payment/qr/'+type, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer '+token },
+      body: fd,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al subir');
+    previewEl.src = data.qrUrl;
+    previewEl.style.display = '';
+    infoEl.textContent = 'WebP · '+(blob.size/1024).toFixed(0)+' KB';
+    toast('QR '+type.charAt(0).toUpperCase()+type.slice(1)+' guardado');
+  } catch(ex) { infoEl.textContent = ''; toast(ex.message,'error'); }
+}
+
 // ── SETTINGS ───────────────────────────────────────────────────────────────
 async function loadSettings() {
   const s=await api('/admin/settings');
@@ -1008,7 +1092,11 @@ async function loadSettings() {
   document.getElementById('s_phoneNumberId').value=s.phoneNumberId||'';
   document.getElementById('s_yapeNumber').value=s.yapeNumber||'';
   document.getElementById('s_yapeOwner').value=s.yapeOwner||'';
+  document.getElementById('s_plinNumber').value=s.plinNumber||'';
+  document.getElementById('s_plinOwner').value=s.plinOwner||'';
   document.getElementById('s_bankAccounts').value=s.bankAccounts||'';
+  if(s.yapeQrUrl){const el=document.getElementById('yapeQrPreview');el.src=s.yapeQrUrl+'?v='+Date.now();el.style.display='';}
+  if(s.plinQrUrl){const el=document.getElementById('plinQrPreview');el.src=s.plinQrUrl+'?v='+Date.now();el.style.display='';}
   if(s.logoUrl){const logo=document.getElementById('navLogo');logo.src=s.logoUrl;logo.style.display='';}
 }
 async function saveSettings(section) {
@@ -1021,6 +1109,8 @@ async function saveSettings(section) {
   } else if(section==='payment'){
     body.yapeNumber=document.getElementById('s_yapeNumber').value.trim();
     body.yapeOwner=document.getElementById('s_yapeOwner').value.trim();
+    body.plinNumber=document.getElementById('s_plinNumber').value.trim();
+    body.plinOwner=document.getElementById('s_plinOwner').value.trim();
     body.bankAccounts=document.getElementById('s_bankAccounts').value.trim();
   } else if(section==='meta'){
     const t=document.getElementById('s_whatsappToken').value.trim(),
