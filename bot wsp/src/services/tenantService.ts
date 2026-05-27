@@ -54,6 +54,14 @@ export function update(id: string, updates: Partial<Omit<Tenant, 'id' | 'created
   return tenants[idx];
 }
 
+export function remove(id: string): boolean {
+  const tenants = load();
+  const filtered = tenants.filter((t) => t.id !== id);
+  if (filtered.length === tenants.length) return false;
+  save(filtered);
+  return true;
+}
+
 // Catalog helpers
 export function addProduct(tenantId: string, product: Product): Tenant | null {
   const tenant = findById(tenantId);

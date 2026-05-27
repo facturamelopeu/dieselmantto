@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import { login, hashPassword } from '../services/authService';
 import * as tenantService from '../services/tenantService';
 import config from '../config';
@@ -58,6 +59,17 @@ router.post('/register', async (req: Request, res: Response) => {
   });
 
   res.status(201).json({ id: tenant.id, username: tenant.username, storeName: tenant.storeName });
+});
+
+// POST /auth/superadmin/login
+router.post('/superadmin/login', (req: Request, res: Response) => {
+  const { token: adminToken } = req.body as { token?: string };
+  if (!adminToken || adminToken !== config.superAdminToken) {
+    res.status(401).json({ error: 'Token incorrecto' });
+    return;
+  }
+  const token = jwt.sign({ role: 'superadmin' }, config.jwtSecret, { expiresIn: '12h' });
+  res.json({ token });
 });
 
 export default router;

@@ -5,6 +5,7 @@ import { handleMessage } from '../handlers/messageHandler';
 import * as tenantService from '../services/tenantService';
 import authRoutes from '../routes/authRoutes';
 import adminRoutes from '../routes/adminRoutes';
+import superAdminRoutes from '../routes/superAdminRoutes';
 
 const app = express();
 app.use(express.json());
@@ -13,6 +14,7 @@ app.use(express.static(path.join(__dirname, '../../public')));
 // Auth & admin API
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
+app.use('/superadmin', superAdminRoutes);
 
 // Meta webhook verification — matches verify_token against all registered tenants
 app.get('/webhook', (req: Request, res: Response) => {
