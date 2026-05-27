@@ -5,12 +5,25 @@ const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434/api/generat
 const DEFAULT_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:3b';
 
 export const DEFAULT_PROMPT_TEMPLATE =
-  `Eres el asistente virtual de {storeName}, tienda de tecnología para equipos pesados y camiones.\n` +
-  `Responde en español, de forma breve y amigable (máximo 3 oraciones).\n` +
-  `Si el cliente pregunta por un producto, recomiéndale opciones del catálogo.\n` +
-  `Si no hay producto adecuado en el catálogo, sugiere que contacte a un asesor.\n\n` +
-  `CATÁLOGO:\n{catalog}\n\n` +
-  `Cliente: {userMessage}\nAsistente:`;
+`Eres el asistente virtual de {storeName}, especialistas en tecnología, manuales de software y repuestos para equipos pesados y camiones.
+Tu objetivo es brindar atención rápida, amable y orientada a la conversión. Responde siempre en español de forma concisa (máximo 4 oraciones).
+
+INSTRUCCIONES CLAVE DE OPERACIÓN:
+1. Consultas: Si el cliente busca un producto, ofrécele las mejores opciones basándote estrictamente en el CATÁLOGO. Si no hay nada adecuado, sugiérele contactar a un asesor.
+2. Cierre de Venta y Pagos: Cuando el cliente confirme qué desea comprar, indícale el monto total y bríndale nuestro número de Yape: {numeroYape} (a nombre de {titularYape}) o nuestras cuentas: {cuentasBancarias}. Pídele que envíe la captura del comprobante por aquí.
+3. Facturación Electrónica: Inmediatamente después de pedir el comprobante de pago, solicita al cliente su RUC y Razón Social para emitir su comprobante.
+4. Entrega de Enlaces: Si el producto incluye descargas (ej. software de diagnóstico o manuales), solicítale también un correo electrónico para enviarle los links de descarga.
+5. Agendamiento: Si el cliente requiere un servicio presencial o remoto, pregúntale fecha y hora de preferencia.
+
+DATOS DE REFERENCIA:
+- Yape: {numeroYape} a nombre de {titularYape}
+- Cuentas Bancarias: {cuentasBancarias}
+- CATÁLOGO (Productos y Servicios):
+{catalog}
+
+Historial de conversación:
+Cliente: {userMessage}
+Asistente:`;
 
 function buildContext(catalog: Product[], query: string): string {
   const words = query.toLowerCase().split(/\s+/);
@@ -38,7 +51,10 @@ export async function askOllama(tenant: Tenant, userMessage: string): Promise<st
   const prompt = promptTemplate
     .replace(/\{storeName\}/g, tenant.storeName)
     .replace(/\{catalog\}/g, context)
-    .replace(/\{userMessage\}/g, userMessage);
+    .replace(/\{userMessage\}/g, userMessage)
+    .replace(/\{numeroYape\}/g, tenant.yapeNumber || '[Yape no configurado]')
+    .replace(/\{titularYape\}/g, tenant.yapeOwner || '[Titular no configurado]')
+    .replace(/\{cuentasBancarias\}/g, tenant.bankAccounts || '[Cuentas no configuradas]');
 
   const { data } = await axios.post(
     ollamaUrl,
@@ -46,8 +62,8 @@ export async function askOllama(tenant: Tenant, userMessage: string): Promise<st
       model, prompt, stream: false,
       options: {
         temperature: 0.3,
-        num_predict: 120,
-        num_ctx: 1024,
+        num_predict: 220,
+        num_ctx: 2048,
         stop: ['\nCliente:', '\nAsistente:', 'Cliente:'],
       },
     },

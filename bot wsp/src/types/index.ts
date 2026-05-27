@@ -58,6 +58,9 @@ export interface Tenant {
   whatsappToken: string;
   phoneNumberId: string;
   verifyToken: string;
+  yapeNumber?: string;
+  yapeOwner?: string;
+  bankAccounts?: string;
   catalog: Product[];
   faqs: FAQ[];
   ai?: TenantAI;

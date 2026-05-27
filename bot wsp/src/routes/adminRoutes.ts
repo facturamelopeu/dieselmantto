@@ -33,12 +33,16 @@ router.get('/settings', (req: AuthRequest, res: Response) => {
     websiteUrl: t.websiteUrl,
     logoUrl: t.logoUrl ?? '',
     phoneNumberId: t.phoneNumberId,
+    yapeNumber: t.yapeNumber ?? '',
+    yapeOwner: t.yapeOwner ?? '',
+    bankAccounts: t.bankAccounts ?? '',
     createdAt: t.createdAt,
   });
 });
 
 router.put('/settings', async (req: AuthRequest, res: Response) => {
-  const { username, storeName, websiteUrl, password, whatsappToken, phoneNumberId, verifyToken, logoUrl } =
+  const { username, storeName, websiteUrl, password, whatsappToken, phoneNumberId, verifyToken, logoUrl,
+          yapeNumber, yapeOwner, bankAccounts } =
     req.body as Record<string, string>;
 
   const updates: Partial<typeof req.tenant> = {};
@@ -50,6 +54,9 @@ router.put('/settings', async (req: AuthRequest, res: Response) => {
   if (phoneNumberId) updates.phoneNumberId = phoneNumberId;
   if (verifyToken) updates.verifyToken = verifyToken;
   if (password) updates.passwordHash = await hashPassword(password);
+  if (yapeNumber !== undefined) updates.yapeNumber = yapeNumber;
+  if (yapeOwner !== undefined) updates.yapeOwner = yapeOwner;
+  if (bankAccounts !== undefined) updates.bankAccounts = bankAccounts;
 
   const updated = tenantService.update(req.tenant!.id, updates);
   res.json({ ok: true, storeName: updated?.storeName });
