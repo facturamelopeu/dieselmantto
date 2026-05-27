@@ -5,6 +5,7 @@ import { sendFaqList, handleFaqSelection } from './faqHandler';
 import { sendCategoryList, handleCategorySelection, handleProductSelection } from './catalogHandler';
 import { askOllama } from '../services/ollamaService';
 import { trackMessage, trackLead } from '../services/statsService';
+import * as chatService from '../services/chatService';
 
 const GREETINGS = ['hola', 'hi', 'hello', 'buenos', 'buenas', 'inicio', 'start', 'menu', 'ayuda', 'help'];
 
@@ -27,10 +28,13 @@ async function route(tenant: Tenant, from: string, id: string): Promise<boolean>
 }
 
 export async function handleMessage(tenant: Tenant, msg: WhatsAppMessage): Promise<void> {
-  const { from, text } = msg;
+  const { from, text, name } = msg;
   const normalized = text.toLowerCase().trim();
 
+  chatService.addMessage(tenant.id, from, { text, direction: 'in', ts: Date.now() }, name);
   trackMessage(tenant.id, from);
+
+  if (!chatService.isBotEnabled(tenant.id, from)) return;
 
   // Resolve numeric shortcut from last shown list
   if (/^\d+$/.test(normalized)) {

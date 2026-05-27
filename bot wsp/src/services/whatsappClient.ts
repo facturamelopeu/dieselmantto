@@ -1,5 +1,6 @@
 import { Tenant, InteractiveButton, InteractiveListSection } from '../types';
 import { sendText } from './waClientManager';
+import * as chatService from './chatService';
 
 // Per-user session: tracks the IDs of the last numbered list shown
 // so user can reply with "1", "2", etc.
@@ -16,6 +17,7 @@ export function resolveNumber(tenantId: string, to: string, n: number): string |
 
 export async function sendTextMessage(tenant: Tenant, to: string, text: string): Promise<void> {
   await sendText(tenant.id, to, text);
+  chatService.addMessage(tenant.id, to, { text, direction: 'out', ts: Date.now() });
 }
 
 export async function sendInteractiveButtons(

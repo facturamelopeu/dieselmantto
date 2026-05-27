@@ -7,6 +7,7 @@ import * as waManager from '../services/waClientManager';
 import authRoutes from '../routes/authRoutes';
 import adminRoutes from '../routes/adminRoutes';
 import superAdminRoutes from '../routes/superAdminRoutes';
+import chatRoutes from '../routes/chatRoutes';
 
 const app = express();
 app.use(express.json());
@@ -15,6 +16,7 @@ app.use(express.static(path.join(__dirname, '../../public')));
 // Auth & admin API
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
+app.use('/admin/chat', chatRoutes);
 app.use('/superadmin', superAdminRoutes);
 
 // Meta webhook kept for backward compat (tenants still using Meta API)

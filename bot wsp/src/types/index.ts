@@ -47,6 +47,7 @@ export interface WhatsAppMessage {
   from: string;
   text: string;
   messageId: string;
+  name?: string;
 }
 
 export interface InteractiveButton {

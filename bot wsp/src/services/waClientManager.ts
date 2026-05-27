@@ -104,6 +104,7 @@ export function initClient(tenant: Tenant): void {
       from: msg.from,
       text: msg.body,
       messageId: msg.id._serialized,
+      name: (msg as any)._data?.notifyName || undefined,
     };
 
     // Lazy import to avoid circular dependency
