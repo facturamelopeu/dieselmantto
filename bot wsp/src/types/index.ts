@@ -14,17 +14,32 @@ export interface FAQ {
   answer: string;
 }
 
+export interface TenantAI {
+  enabled: boolean;
+  model: string;
+  prompt: string;
+}
+
+export interface TenantStats {
+  messages: number;
+  conversations: number;
+  leads: number;
+}
+
 export interface Tenant {
   id: string;
   username: string;
   passwordHash: string;
   storeName: string;
   websiteUrl: string;
+  logoUrl?: string;
   whatsappToken: string;
   phoneNumberId: string;
   verifyToken: string;
   catalog: Product[];
   faqs: FAQ[];
+  ai?: TenantAI;
+  stats?: TenantStats;
   createdAt: string;
 }
 

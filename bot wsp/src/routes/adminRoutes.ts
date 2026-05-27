@@ -2,13 +2,16 @@ import { Router, Response } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/authMiddleware';
 import * as tenantService from '../services/tenantService';
 import * as waManager from '../services/waClientManager';
+import * as scraperService from '../services/scraperService';
 import { hashPassword } from '../services/authService';
-import { Product, FAQ } from '../types';
+import { DEFAULT_PROMPT_TEMPLATE } from '../services/ollamaService';
+import { Product, FAQ, TenantAI } from '../types';
 
 const router = Router();
 router.use(authMiddleware);
 
-// GET /admin/settings
+// ── Settings ─────────────────────────────────────────────────────────────────
+
 router.get('/settings', (req: AuthRequest, res: Response) => {
   const t = req.tenant!;
   res.json({
@@ -16,20 +19,21 @@ router.get('/settings', (req: AuthRequest, res: Response) => {
     username: t.username,
     storeName: t.storeName,
     websiteUrl: t.websiteUrl,
+    logoUrl: t.logoUrl ?? '',
     phoneNumberId: t.phoneNumberId,
     createdAt: t.createdAt,
   });
 });
 
-// PUT /admin/settings
 router.put('/settings', async (req: AuthRequest, res: Response) => {
-  const { username, storeName, websiteUrl, password, whatsappToken, phoneNumberId, verifyToken } =
+  const { username, storeName, websiteUrl, password, whatsappToken, phoneNumberId, verifyToken, logoUrl } =
     req.body as Record<string, string>;
 
   const updates: Partial<typeof req.tenant> = {};
   if (username) updates.username = username;
   if (storeName) updates.storeName = storeName;
   if (websiteUrl !== undefined) updates.websiteUrl = websiteUrl;
+  if (logoUrl !== undefined) updates.logoUrl = logoUrl;
   if (whatsappToken) updates.whatsappToken = whatsappToken;
   if (phoneNumberId) updates.phoneNumberId = phoneNumberId;
   if (verifyToken) updates.verifyToken = verifyToken;
@@ -41,12 +45,10 @@ router.put('/settings', async (req: AuthRequest, res: Response) => {
 
 // ── Catálogo ─────────────────────────────────────────────────────────────────
 
-// GET /admin/catalog
 router.get('/catalog', (req: AuthRequest, res: Response) => {
   res.json(req.tenant!.catalog);
 });
 
-// POST /admin/catalog
 router.post('/catalog', (req: AuthRequest, res: Response) => {
   const p = req.body as Partial<Product>;
   if (!p.name || !p.category || !p.description) {
@@ -66,7 +68,6 @@ router.post('/catalog', (req: AuthRequest, res: Response) => {
   res.status(201).json(product);
 });
 
-// PUT /admin/catalog/:id
 router.put('/catalog/:id', (req: AuthRequest, res: Response) => {
   const tenant = req.tenant!;
   const existing = tenant.catalog.find((p) => p.id === req.params.id);
@@ -76,7 +77,6 @@ router.put('/catalog/:id', (req: AuthRequest, res: Response) => {
   res.json(updated);
 });
 
-// DELETE /admin/catalog/:id
 router.delete('/catalog/:id', (req: AuthRequest, res: Response) => {
   tenantService.removeProduct(req.tenant!.id, req.params.id);
   res.json({ ok: true });
@@ -84,12 +84,10 @@ router.delete('/catalog/:id', (req: AuthRequest, res: Response) => {
 
 // ── FAQs ─────────────────────────────────────────────────────────────────────
 
-// GET /admin/faqs
 router.get('/faqs', (req: AuthRequest, res: Response) => {
   res.json(req.tenant!.faqs);
 });
 
-// POST /admin/faqs
 router.post('/faqs', (req: AuthRequest, res: Response) => {
   const { question, answer } = req.body as Partial<FAQ>;
   if (!question || !answer) {
@@ -100,34 +98,80 @@ router.post('/faqs', (req: AuthRequest, res: Response) => {
   res.status(201).json(updated?.faqs.at(-1));
 });
 
-// DELETE /admin/faqs/:id
 router.delete('/faqs/:id', (req: AuthRequest, res: Response) => {
   tenantService.removeFaq(req.tenant!.id, parseInt(req.params.id, 10));
   res.json({ ok: true });
 });
 
-// ── WhatsApp QR ───────────────────────────────────────────────────────────────
+// ── IA / Agente ──────────────────────────────────────────────────────────────
 
-// GET /admin/whatsapp/status
-router.get('/whatsapp/status', (req: AuthRequest, res: Response) => {
-  const status = waManager.getStatus(req.tenant!.id);
-  res.json({ status });
+router.get('/ai', (req: AuthRequest, res: Response) => {
+  const ai = req.tenant!.ai ?? { enabled: true, model: 'llama3.2:3b', prompt: DEFAULT_PROMPT_TEMPLATE };
+  res.json(ai);
 });
 
-// GET /admin/whatsapp/qr
+router.put('/ai', (req: AuthRequest, res: Response) => {
+  const { enabled, model, prompt } = req.body as Partial<TenantAI>;
+  const current = req.tenant!.ai ?? { enabled: true, model: 'llama3.2:3b', prompt: DEFAULT_PROMPT_TEMPLATE };
+  const updated: TenantAI = {
+    enabled: enabled ?? current.enabled,
+    model: model || current.model,
+    prompt: prompt || current.prompt,
+  };
+  tenantService.update(req.tenant!.id, { ai: updated });
+  res.json({ ok: true });
+});
+
+// ── Estadísticas ─────────────────────────────────────────────────────────────
+
+router.get('/stats', (req: AuthRequest, res: Response) => {
+  res.json(req.tenant!.stats ?? { messages: 0, conversations: 0, leads: 0 });
+});
+
+router.post('/stats/reset', (req: AuthRequest, res: Response) => {
+  tenantService.update(req.tenant!.id, { stats: { messages: 0, conversations: 0, leads: 0 } });
+  res.json({ ok: true });
+});
+
+// ── Scraper ───────────────────────────────────────────────────────────────────
+
+router.post('/scrape', async (req: AuthRequest, res: Response) => {
+  const url = (req.body as { url?: string }).url || req.tenant!.websiteUrl;
+  if (!url) { res.status(400).json({ error: 'URL requerida' }); return; }
+
+  try {
+    const products = await scraperService.scrapeUrl(url);
+    if (products.length === 0) {
+      res.status(422).json({ error: 'No se encontraron productos en la URL indicada' });
+      return;
+    }
+    for (const p of products) {
+      tenantService.addProduct(req.tenant!.id, p);
+    }
+    res.json({ ok: true, added: products.length, products });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: `Error al scrapear: ${msg}` });
+  }
+});
+
+// ── WhatsApp QR ───────────────────────────────────────────────────────────────
+
+router.get('/whatsapp/status', (req: AuthRequest, res: Response) => {
+  res.json({ status: waManager.getStatus(req.tenant!.id) });
+});
+
 router.get('/whatsapp/qr', (req: AuthRequest, res: Response) => {
   const qr = waManager.getQR(req.tenant!.id);
   if (!qr) { res.status(404).json({ error: 'QR no disponible' }); return; }
   res.json({ qr });
 });
 
-// POST /admin/whatsapp/connect
 router.post('/whatsapp/connect', (req: AuthRequest, res: Response) => {
   waManager.initClient(req.tenant!);
   res.json({ ok: true, message: 'Iniciando conexión. Espera el QR.' });
 });
 
-// POST /admin/whatsapp/logout
 router.post('/whatsapp/logout', async (req: AuthRequest, res: Response) => {
   await waManager.logoutClient(req.tenant!.id);
   res.json({ ok: true });

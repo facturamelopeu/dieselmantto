@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { superAdminMiddleware, SuperAdminRequest } from '../middleware/superAdminMiddleware';
 import * as tenantService from '../services/tenantService';
+import * as waManager from '../services/waClientManager';
 import { hashPassword } from '../services/authService';
 
 const router = Router();
@@ -13,10 +14,14 @@ router.get('/tenants', (_req: SuperAdminRequest, res: Response) => {
     username: t.username,
     storeName: t.storeName,
     websiteUrl: t.websiteUrl,
+    logoUrl: t.logoUrl ?? '',
     phoneNumberId: t.phoneNumberId,
     verifyToken: t.verifyToken,
     productCount: t.catalog.length,
     faqCount: t.faqs.length,
+    ai: t.ai ?? { enabled: true, model: 'llama3.2:3b' },
+    stats: t.stats ?? { messages: 0, conversations: 0, leads: 0 },
+    waStatus: waManager.getStatus(t.id),
     createdAt: t.createdAt,
   }));
   res.json(tenants);
@@ -56,13 +61,14 @@ router.post('/tenants', async (req: SuperAdminRequest, res: Response) => {
 
 // PUT /superadmin/tenants/:id  — update any field
 router.put('/tenants/:id', async (req: SuperAdminRequest, res: Response) => {
-  const { username, storeName, websiteUrl, password, whatsappToken, phoneNumberId, verifyToken } =
+  const { username, storeName, websiteUrl, logoUrl, password, whatsappToken, phoneNumberId, verifyToken } =
     req.body as Record<string, string>;
 
   const updates: Parameters<typeof tenantService.update>[1] = {};
   if (username) updates.username = username;
   if (storeName) updates.storeName = storeName;
   if (websiteUrl !== undefined) updates.websiteUrl = websiteUrl;
+  if (logoUrl !== undefined) updates.logoUrl = logoUrl;
   if (whatsappToken) updates.whatsappToken = whatsappToken;
   if (phoneNumberId) updates.phoneNumberId = phoneNumberId;
   if (verifyToken) updates.verifyToken = verifyToken;

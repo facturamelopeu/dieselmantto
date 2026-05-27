@@ -7,31 +7,22 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
-
-    /* NAV */
-    nav { background: #1e293b; border-bottom: 1px solid #334155; padding: 0 24px; display: flex; align-items: center; height: 56px; gap: 8px; }
-    .nav-brand { font-weight: 700; color: #25d366; font-size: 16px; margin-right: auto; display: flex; align-items: center; gap: 8px; }
+    nav { background: #1e293b; border-bottom: 1px solid #334155; padding: 0 24px; display: flex; align-items: center; height: 56px; gap: 10px; }
+    .nav-logo { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; display: none; }
+    .nav-brand { font-weight: 700; color: #25d366; font-size: 16px; margin-right: auto; }
     .nav-store { color: #94a3b8; font-size: 13px; }
     .nav-logout { background: none; border: 1px solid #334155; color: #94a3b8; border-radius: 6px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
     .nav-logout:hover { color: #f1f5f9; border-color: #475569; }
-
-    /* TABS */
-    .tabs { display: flex; gap: 0; background: #1e293b; border-bottom: 1px solid #334155; padding: 0 24px; }
-    .tab { padding: 14px 20px; font-size: 14px; font-weight: 500; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+    .tabs { display: flex; background: #1e293b; border-bottom: 1px solid #334155; padding: 0 24px; overflow-x: auto; }
+    .tab { padding: 14px 18px; font-size: 14px; font-weight: 500; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; }
     .tab:hover { color: #cbd5e1; }
     .tab.active { color: #25d366; border-bottom-color: #25d366; }
-
-    /* CONTENT */
-    .content { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+    .content { max-width: 960px; margin: 0 auto; padding: 28px 20px; }
     .panel { display: none; }
     .panel.active { display: block; }
-
-    /* SECTION HEADER */
-    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 12px; }
     .section-header h2 { font-size: 20px; font-weight: 700; }
     .section-header p { color: #64748b; font-size: 13px; margin-top: 2px; }
-
-    /* BUTTONS */
     .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; }
     .btn-primary { background: #25d366; color: #0f172a; }
     .btn-primary:hover { background: #1fba56; }
@@ -39,215 +30,218 @@
     .btn-secondary:hover { background: #334155; }
     .btn-danger { background: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d; }
     .btn-danger:hover { background: #7f1d1d; color: #fff; }
+    .btn-warning { background: #1c1917; color: #fbbf24; border: 1px solid #78350f; }
+    .btn-warning:hover { background: #78350f; }
     .btn-sm { padding: 5px 10px; font-size: 12px; }
-
-    /* CARD */
-    .card { background: #1e293b; border-radius: 10px; border: 1px solid #334155; }
-    .card-body { padding: 20px; }
-
-    /* TABLE */
+    .btn-purple { background: #4c1d95; color: #c4b5fd; border: 1px solid #6d28d9; }
+    .btn-purple:hover { background: #6d28d9; color: #fff; }
+    .card { background: #1e293b; border-radius: 10px; border: 1px solid #334155; overflow: hidden; }
     table { width: 100%; border-collapse: collapse; }
     th { text-align: left; padding: 10px 14px; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #334155; }
-    td { padding: 12px 14px; font-size: 14px; border-bottom: 1px solid #1e293b; vertical-align: top; }
+    td { padding: 12px 14px; font-size: 14px; border-bottom: 1px solid #1a2540; vertical-align: top; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #1a2540; }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #0f172a; color: #94a3b8; border: 1px solid #334155; }
-
-    /* FORM */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .form-grid.cols-1 { grid-template-columns: 1fr; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .badge-gray { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+    .badge-green { background: #052e16; color: #4ade80; }
+    .settings-card { background: #1e293b; border-radius: 10px; border: 1px solid #334155; padding: 22px; margin-bottom: 18px; }
+    .settings-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 18px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .field { display: flex; flex-direction: column; gap: 6px; }
     .field.full { grid-column: 1 / -1; }
     label { font-size: 13px; font-weight: 500; color: #94a3b8; }
-    input, select, textarea {
-      background: #0f172a; border: 1px solid #334155; border-radius: 8px;
-      padding: 9px 12px; color: #f1f5f9; font-size: 14px; outline: none;
-      transition: border-color 0.15s; font-family: inherit;
-    }
+    input, select, textarea { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 9px 12px; color: #f1f5f9; font-size: 14px; outline: none; font-family: inherit; transition: border-color 0.15s; }
     input:focus, select:focus, textarea:focus { border-color: #25d366; }
-    textarea { resize: vertical; min-height: 80px; }
-
-    /* MODAL */
+    textarea { resize: vertical; min-height: 90px; }
+    .hint { font-size: 12px; color: #475569; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #1e293b; }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-label { font-size: 14px; font-weight: 500; }
+    .toggle-desc { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .switch { position: relative; width: 42px; height: 24px; cursor: pointer; }
+    .switch input { display: none; }
+    .slider { position: absolute; inset: 0; background: #334155; border-radius: 24px; transition: background 0.2s; }
+    .slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
+    .switch input:checked + .slider { background: #25d366; }
+    .switch input:checked + .slider::before { transform: translateX(18px); }
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+    .stat-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 20px; text-align: center; }
+    .stat-num { font-size: 36px; font-weight: 800; color: #25d366; line-height: 1; }
+    .stat-label { font-size: 13px; color: #64748b; margin-top: 6px; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
     .modal-overlay.open { display: flex; }
     .modal { background: #1e293b; border-radius: 12px; border: 1px solid #334155; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
-    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #334155; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #334155; }
     .modal-header h3 { font-size: 16px; font-weight: 700; }
-    .modal-close { background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; line-height: 1; }
-    .modal-body { padding: 24px; }
-    .modal-footer { padding: 16px 24px; border-top: 1px solid #334155; display: flex; justify-content: flex-end; gap: 10px; }
-
-    /* TOAST */
+    .modal-close { background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; }
+    .modal-body { padding: 22px; }
+    .modal-footer { padding: 14px 22px; border-top: 1px solid #334155; display: flex; justify-content: flex-end; gap: 10px; }
     #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 12px 18px; font-size: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); transition: all 0.3s; opacity: 0; transform: translateY(10px); pointer-events: none; z-index: 200; }
     #toast.show { opacity: 1; transform: translateY(0); }
     #toast.success { border-color: #25d366; color: #25d366; }
     #toast.error { border-color: #ef4444; color: #ef4444; }
-
-    /* SETTINGS */
-    .settings-card { background: #1e293b; border-radius: 10px; border: 1px solid #334155; padding: 24px; margin-bottom: 20px; }
-    .settings-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 20px; color: #f1f5f9; }
-
-    /* EMPTY STATE */
     .empty { text-align: center; padding: 48px; color: #64748b; }
-    .empty p { font-size: 15px; margin-top: 8px; }
-
-    @media (max-width: 600px) {
-      .form-grid { grid-template-columns: 1fr; }
-      .content { padding: 20px 16px; }
-    }
+    .code-block { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; color: #94a3b8; line-height: 1.6; white-space: pre-wrap; }
+    @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } .stat-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-
-<!-- NAV -->
 <nav>
+  <img class="nav-logo" id="navLogo" src="" alt="" />
   <div class="nav-brand">💬 WhatsApp Bot</div>
   <span class="nav-store" id="navStore"></span>
   <button class="nav-logout" onclick="logout()">Salir</button>
 </nav>
-
-<!-- TABS -->
 <div class="tabs">
-  <div class="tab active" onclick="showTab('catalog')">Catálogo</div>
+  <div class="tab active" onclick="showTab('stats')">Dashboard</div>
+  <div class="tab" onclick="showTab('catalog')">Catálogo</div>
   <div class="tab" onclick="showTab('faqs')">FAQs</div>
+  <div class="tab" onclick="showTab('ai')">Agente IA</div>
   <div class="tab" onclick="showTab('whatsapp')">WhatsApp</div>
   <div class="tab" onclick="showTab('settings')">Configuración</div>
 </div>
-
-<!-- CONTENT -->
 <div class="content">
 
-  <!-- CATALOG PANEL -->
-  <div class="panel active" id="panel-catalog">
-    <div class="section-header">
-      <div>
-        <h2>Catálogo de Productos</h2>
-        <p id="catalogCount"></p>
-      </div>
-      <button class="btn btn-primary" onclick="openProductModal()">+ Agregar Producto</button>
+  <!-- DASHBOARD -->
+  <div class="panel active" id="panel-stats">
+    <div class="section-header"><div><h2>Dashboard</h2><p id="statsSubtitle">Actividad del bot</p></div>
+      <button class="btn btn-danger btn-sm" onclick="resetStats()">Reiniciar contadores</button>
     </div>
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Categoría</th>
-            <th>Precio</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="catalogBody"></tbody>
-      </table>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num" id="st-messages">—</div><div class="stat-label">Mensajes recibidos</div></div>
+      <div class="stat-card"><div class="stat-num" id="st-conversations">—</div><div class="stat-label">Conversaciones únicas</div></div>
+      <div class="stat-card"><div class="stat-num" id="st-leads" style="color:#fbbf24">—</div><div class="stat-label">Leads (solicitaron asesor)</div></div>
+    </div>
+    <div class="settings-card">
+      <h3>Resumen</h3>
+      <div id="statsInfo" style="color:#94a3b8;font-size:14px;line-height:1.8"></div>
     </div>
   </div>
 
-  <!-- FAQS PANEL -->
+  <!-- CATALOG -->
+  <div class="panel" id="panel-catalog">
+    <div class="section-header">
+      <div><h2>Catálogo</h2><p id="catalogCount"></p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-purple btn-sm" onclick="openScrapeModal()">🔗 Importar desde web</button>
+        <button class="btn btn-primary" onclick="openProductModal()">+ Agregar</button>
+      </div>
+    </div>
+    <div class="card">
+      <table><thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Acciones</th></tr></thead>
+      <tbody id="catalogBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- FAQS -->
   <div class="panel" id="panel-faqs">
     <div class="section-header">
-      <div>
-        <h2>Preguntas Frecuentes</h2>
-        <p id="faqCount"></p>
-      </div>
+      <div><h2>Preguntas Frecuentes</h2><p id="faqCount"></p></div>
       <button class="btn btn-primary" onclick="openFaqModal()">+ Agregar FAQ</button>
     </div>
     <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Pregunta</th>
-            <th>Respuesta</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="faqBody"></tbody>
-      </table>
+      <table><thead><tr><th>#</th><th>Pregunta</th><th>Respuesta</th><th></th></tr></thead>
+      <tbody id="faqBody"></tbody></table>
     </div>
   </div>
 
-  <!-- WHATSAPP PANEL -->
-  <div class="panel" id="panel-whatsapp">
-    <div class="section-header">
-      <div><h2>Conexión WhatsApp</h2><p>Vincula tu número escaneando el código QR</p></div>
+  <!-- AI -->
+  <div class="panel" id="panel-ai">
+    <div class="section-header"><div><h2>Agente IA</h2><p>Configura el comportamiento de la inteligencia artificial</p></div>
+      <button class="btn btn-primary" onclick="saveAI()">Guardar IA</button>
     </div>
+    <div class="settings-card">
+      <div class="toggle-row">
+        <div><div class="toggle-label">IA habilitada</div><div class="toggle-desc">El bot usa IA (Ollama) para responder preguntas libres</div></div>
+        <label class="switch"><input type="checkbox" id="ai_enabled" /><span class="slider"></span></label>
+      </div>
+    </div>
+    <div class="settings-card">
+      <h3>Modelo de lenguaje</h3>
+      <div class="form-grid">
+        <div class="field">
+          <label>Modelo Ollama</label>
+          <input type="text" id="ai_model" placeholder="llama3.2:3b" />
+          <span class="hint">Modelos disponibles: llama3.2:3b, llama3.1:8b, mistral, gemma2:9b</span>
+        </div>
+      </div>
+    </div>
+    <div class="settings-card">
+      <h3>Prompt del sistema</h3>
+      <p style="color:#64748b;font-size:13px;margin-bottom:14px">Variables disponibles: <code style="color:#a78bfa">{storeName}</code> <code style="color:#a78bfa">{catalog}</code> <code style="color:#a78bfa">{userMessage}</code></p>
+      <textarea id="ai_prompt" style="min-height:200px;font-family:monospace;font-size:13px" placeholder="Eres el asistente de {storeName}..."></textarea>
+    </div>
+    <div class="settings-card">
+      <h3>Probar IA</h3>
+      <div class="form-grid">
+        <div class="field full">
+          <label>Mensaje de prueba</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="ai_test_msg" placeholder="¿Qué productos tienen para diagnóstico?" style="flex:1" />
+            <button class="btn btn-secondary" onclick="testAI()">Probar</button>
+          </div>
+        </div>
+        <div class="field full" id="ai_test_result" style="display:none">
+          <label>Respuesta del bot</label>
+          <div class="code-block" id="ai_test_output"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <div class="settings-card" id="wa-card">
-      <div id="wa-status-row" style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-        <span id="wa-status-badge" style="padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700">—</span>
+  <!-- WHATSAPP -->
+  <div class="panel" id="panel-whatsapp">
+    <div class="section-header"><div><h2>Conexión WhatsApp</h2><p>Vincula tu número escaneando el código QR</p></div></div>
+    <div class="settings-card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+        <span id="wa-status-badge" style="padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700">—</span>
         <span id="wa-status-label" style="color:#94a3b8;font-size:14px"></span>
       </div>
-
-      <!-- QR container -->
-      <div id="wa-qr-container" style="display:none;text-align:center;margin-bottom:20px">
-        <p style="color:#94a3b8;font-size:13px;margin-bottom:14px">Abre WhatsApp en tu celular → Dispositivos vinculados → Vincular un dispositivo → escanea este código:</p>
-        <img id="wa-qr-img" src="" alt="QR Code" style="width:220px;height:220px;border-radius:10px;border:2px solid #334155" />
-        <p style="color:#64748b;font-size:12px;margin-top:10px">El QR se actualiza automáticamente cada 20 segundos</p>
+      <div id="wa-qr-container" style="display:none;text-align:center;margin-bottom:18px">
+        <p style="color:#94a3b8;font-size:13px;margin-bottom:12px">Abre WhatsApp → Dispositivos vinculados → Vincular dispositivo → escanea:</p>
+        <img id="wa-qr-img" src="" alt="QR" style="width:220px;height:220px;border-radius:10px;border:2px solid #334155" />
+        <p style="color:#64748b;font-size:12px;margin-top:8px">El QR se actualiza automáticamente</p>
       </div>
-
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div style="display:flex;gap:10px">
         <button class="btn btn-primary" id="wa-connect-btn" onclick="waConnect()" style="display:none">Conectar WhatsApp</button>
         <button class="btn btn-danger" id="wa-logout-btn" onclick="waLogout()" style="display:none">Desconectar</button>
       </div>
     </div>
   </div>
 
-  <!-- SETTINGS PANEL -->
+  <!-- SETTINGS -->
   <div class="panel" id="panel-settings">
-    <div class="section-header">
-      <div><h2>Configuración</h2></div>
-    </div>
-
+    <div class="section-header"><div><h2>Configuración</h2></div></div>
     <div class="settings-card">
-      <h3>Información de la Tienda</h3>
+      <h3>Información de la tienda</h3>
       <div class="form-grid">
-        <div class="field">
-          <label>Nombre de la tienda</label>
-          <input type="text" id="s_storeName" placeholder="Mi Tienda" />
-        </div>
-        <div class="field">
-          <label>Usuario (login)</label>
-          <input type="text" id="s_username" placeholder="admin@empresa" />
-        </div>
+        <div class="field"><label>Nombre de la tienda</label><input type="text" id="s_storeName" /></div>
+        <div class="field"><label>Usuario (login)</label><input type="text" id="s_username" /></div>
+        <div class="field full"><label>URL del sitio web</label><input type="url" id="s_websiteUrl" /></div>
         <div class="field full">
-          <label>URL del sitio web</label>
-          <input type="url" id="s_websiteUrl" placeholder="https://mitienda.com" />
+          <label>URL del logo</label>
+          <input type="url" id="s_logoUrl" placeholder="https://mitienda.com/logo.png" />
+          <span class="hint">URL pública de la imagen del logo (PNG, JPG)</span>
         </div>
       </div>
-      <button class="btn btn-primary" style="margin-top:18px" onclick="saveSettings('store')">Guardar cambios</button>
+      <button class="btn btn-primary" style="margin-top:16px" onclick="saveSettings('store')">Guardar</button>
     </div>
-
     <div class="settings-card">
-      <h3>Credenciales WhatsApp (Meta)</h3>
+      <h3>Credenciales WhatsApp (Meta API)</h3>
       <div class="form-grid">
-        <div class="field full">
-          <label>Token de acceso (WhatsApp)</label>
-          <input type="password" id="s_whatsappToken" placeholder="EAAemx..." autocomplete="new-password" />
-        </div>
-        <div class="field">
-          <label>Phone Number ID</label>
-          <input type="text" id="s_phoneNumberId" placeholder="994411380422057" />
-        </div>
-        <div class="field">
-          <label>Verify Token (webhook)</label>
-          <input type="text" id="s_verifyToken" placeholder="verify_empresa_2024" />
-        </div>
+        <div class="field full"><label>Token de acceso</label><input type="password" id="s_whatsappToken" placeholder="EAAemx..." /></div>
+        <div class="field"><label>Phone Number ID</label><input type="text" id="s_phoneNumberId" /></div>
+        <div class="field"><label>Verify Token</label><input type="text" id="s_verifyToken" /></div>
       </div>
-      <button class="btn btn-primary" style="margin-top:18px" onclick="saveSettings('meta')">Guardar credenciales</button>
+      <button class="btn btn-primary" style="margin-top:16px" onclick="saveSettings('meta')">Guardar credenciales</button>
     </div>
-
     <div class="settings-card">
-      <h3>Cambiar Contraseña</h3>
+      <h3>Cambiar contraseña</h3>
       <div class="form-grid">
-        <div class="field">
-          <label>Nueva contraseña</label>
-          <input type="password" id="s_password" placeholder="••••••••" autocomplete="new-password" />
-        </div>
-        <div class="field">
-          <label>Confirmar contraseña</label>
-          <input type="password" id="s_password2" placeholder="••••••••" autocomplete="new-password" />
-        </div>
+        <div class="field"><label>Nueva contraseña</label><input type="password" id="s_password" /></div>
+        <div class="field"><label>Confirmar</label><input type="password" id="s_password2" /></div>
       </div>
-      <button class="btn btn-primary" style="margin-top:18px" onclick="saveSettings('password')">Cambiar contraseña</button>
+      <button class="btn btn-primary" style="margin-top:16px" onclick="saveSettings('password')">Cambiar</button>
     </div>
   </div>
 </div>
@@ -255,33 +249,14 @@
 <!-- PRODUCT MODAL -->
 <div class="modal-overlay" id="productModal">
   <div class="modal">
-    <div class="modal-header">
-      <h3 id="productModalTitle">Agregar Producto</h3>
-      <button class="modal-close" onclick="closeModal('productModal')">✕</button>
-    </div>
+    <div class="modal-header"><h3 id="productModalTitle">Agregar Producto</h3><button class="modal-close" onclick="closeModal('productModal')">✕</button></div>
     <div class="modal-body">
       <div class="form-grid">
-        <div class="field full">
-          <label>Nombre *</label>
-          <input type="text" id="p_name" placeholder="Ej: GPS Tracker 4G" />
-        </div>
-        <div class="field">
-          <label>Categoría *</label>
-          <input type="text" id="p_category" placeholder="Ej: Seguridad Minera" list="categoryList" />
-          <datalist id="categoryList"></datalist>
-        </div>
-        <div class="field">
-          <label>Precio</label>
-          <input type="text" id="p_price" placeholder="Ej: S/ 350" />
-        </div>
-        <div class="field full">
-          <label>Descripción *</label>
-          <textarea id="p_description" placeholder="Descripción del producto..."></textarea>
-        </div>
-        <div class="field full">
-          <label>Palabras clave (separadas por coma)</label>
-          <input type="text" id="p_keywords" placeholder="gps, rastreo, 4g, tracker" />
-        </div>
+        <div class="field full"><label>Nombre *</label><input type="text" id="p_name" /></div>
+        <div class="field"><label>Categoría *</label><input type="text" id="p_category" list="categoryList" /><datalist id="categoryList"></datalist></div>
+        <div class="field"><label>Precio</label><input type="text" id="p_price" placeholder="S/ 350" /></div>
+        <div class="field full"><label>Descripción *</label><textarea id="p_description"></textarea></div>
+        <div class="field full"><label>Palabras clave (coma)</label><input type="text" id="p_keywords" /></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -294,20 +269,11 @@
 <!-- FAQ MODAL -->
 <div class="modal-overlay" id="faqModal">
   <div class="modal">
-    <div class="modal-header">
-      <h3>Agregar Pregunta Frecuente</h3>
-      <button class="modal-close" onclick="closeModal('faqModal')">✕</button>
-    </div>
+    <div class="modal-header"><h3>Agregar FAQ</h3><button class="modal-close" onclick="closeModal('faqModal')">✕</button></div>
     <div class="modal-body">
-      <div class="form-grid cols-1">
-        <div class="field">
-          <label>Pregunta *</label>
-          <input type="text" id="f_question" placeholder="¿Cuál es el horario de atención?" />
-        </div>
-        <div class="field">
-          <label>Respuesta *</label>
-          <textarea id="f_answer" style="min-height:120px" placeholder="Atendemos de lunes a viernes de 9am a 6pm..."></textarea>
-        </div>
+      <div class="form-grid" style="grid-template-columns:1fr">
+        <div class="field"><label>Pregunta *</label><input type="text" id="f_question" /></div>
+        <div class="field"><label>Respuesta *</label><textarea id="f_answer" style="min-height:120px"></textarea></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -317,298 +283,325 @@
   </div>
 </div>
 
-<!-- TOAST -->
+<!-- SCRAPE MODAL -->
+<div class="modal-overlay" id="scrapeModal">
+  <div class="modal">
+    <div class="modal-header"><h3>Importar productos desde web</h3><button class="modal-close" onclick="closeModal('scrapeModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="field" style="margin-bottom:16px">
+        <label>URL del sitio web</label>
+        <input type="url" id="scrape_url" placeholder="https://mitienda.com/productos" />
+        <span class="hint">El bot extraerá automáticamente productos de la página</span>
+      </div>
+      <div id="scrape_result" style="display:none" class="code-block"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('scrapeModal')">Cerrar</button>
+      <button class="btn btn-purple" id="scrapeBtn" onclick="runScrape()">Importar productos</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
-  const API = '';
-  let token = localStorage.getItem('wsp_token');
-  let editingProductId = null;
-  let catalog = [];
-  let faqs = [];
+const token = localStorage.getItem('wsp_token');
+if (!token) location.href = '/';
 
-  if (!token) location.href = '/';
+let catalog = [], faqs = [], editingProductId = null, waPollingTimer = null;
 
-  document.getElementById('navStore').textContent = localStorage.getItem('wsp_store') || '';
+document.getElementById('navStore').textContent = localStorage.getItem('wsp_store') || '';
 
-  // ── HELPERS ──────────────────────────────────────────────────────────────────
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function logout() { localStorage.clear(); location.href = '/'; }
 
-  function logout() {
-    localStorage.removeItem('wsp_token');
-    localStorage.removeItem('wsp_store');
-    location.href = '/';
+function api(path, opts = {}) {
+  return fetch(path, {
+    ...opts,
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', ...(opts.headers||{}) },
+  }).then(async r => {
+    if (r.status === 401) { logout(); return; }
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || r.statusText);
+    return d;
+  });
+}
+
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'show ' + type;
+  clearTimeout(el._t); el._t = setTimeout(() => el.className = '', 2800);
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function showTab(name) {
+  const tabs = ['stats','catalog','faqs','ai','whatsapp','settings'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  if (name==='stats') loadStats();
+  if (name==='catalog') loadCatalog();
+  if (name==='faqs') loadFaqs();
+  if (name==='ai') loadAI();
+  if (name==='whatsapp') { loadWaStatus(); startWaPolling(); } else stopWaPolling();
+  if (name==='settings') loadSettings();
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+async function loadStats() {
+  const s = await api('/admin/stats');
+  document.getElementById('st-messages').textContent = s.messages || 0;
+  document.getElementById('st-conversations').textContent = s.conversations || 0;
+  document.getElementById('st-leads').textContent = s.leads || 0;
+  const conv = s.conversations || 0;
+  const leads = s.leads || 0;
+  const pct = conv > 0 ? Math.round((leads/conv)*100) : 0;
+  document.getElementById('statsInfo').innerHTML =
+    `<b>Conversión:</b> ${pct}% de conversaciones solicitaron asesor<br>` +
+    `<b>Mensajes por conversación:</b> ${conv>0 ? (s.messages/conv).toFixed(1) : '—'} promedio`;
+}
+
+async function resetStats() {
+  if (!confirm('¿Reiniciar todos los contadores?')) return;
+  await api('/admin/stats/reset', { method: 'POST' });
+  toast('Contadores reiniciados');
+  loadStats();
+}
+
+// ── CATALOG ───────────────────────────────────────────────────────────────────
+async function loadCatalog() {
+  catalog = await api('/admin/catalog');
+  document.getElementById('catalogCount').textContent = catalog.length + ' productos';
+  const tbody = document.getElementById('catalogBody');
+  if (!catalog.length) { tbody.innerHTML = '<tr><td colspan="4"><div class="empty">Sin productos. Agrega uno o importa desde tu web.</div></td></tr>'; return; }
+  tbody.innerHTML = catalog.map(p => `
+    <tr>
+      <td><strong>${esc(p.name)}</strong><div style="color:#64748b;font-size:12px;margin-top:2px">${esc(p.description.slice(0,55))}${p.description.length>55?'…':''}</div></td>
+      <td><span class="badge badge-gray">${esc(p.category)}</span></td>
+      <td style="color:#94a3b8">${p.price?esc(p.price):'—'}</td>
+      <td><button class="btn btn-secondary btn-sm" onclick="editProduct('${esc(p.id)}')">Editar</button>
+          <button class="btn btn-danger btn-sm" style="margin-left:6px" onclick="deleteProduct('${esc(p.id)}','${esc(p.name)}')">Eliminar</button></td>
+    </tr>`).join('');
+  const cats = [...new Set(catalog.map(p => p.category))];
+  document.getElementById('categoryList').innerHTML = cats.map(c => `<option value="${esc(c)}">`).join('');
+}
+
+function openProductModal(id) {
+  editingProductId = id || null;
+  document.getElementById('productModalTitle').textContent = id ? 'Editar Producto' : 'Agregar Producto';
+  if (id) {
+    const p = catalog.find(x => x.id === id);
+    document.getElementById('p_name').value = p.name;
+    document.getElementById('p_category').value = p.category;
+    document.getElementById('p_price').value = p.price || '';
+    document.getElementById('p_description').value = p.description;
+    document.getElementById('p_keywords').value = (p.keywords||[]).join(', ');
+  } else {
+    ['p_name','p_category','p_price','p_description','p_keywords'].forEach(i => document.getElementById(i).value='');
   }
+  openModal('productModal');
+}
 
-  function api(path, opts = {}) {
-    return fetch(API + path, {
-      ...opts,
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', ...(opts.headers || {}) },
-    }).then(async (r) => {
-      if (r.status === 401) { logout(); return; }
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || r.statusText);
-      return data;
-    });
-  }
+function editProduct(id) { openProductModal(id); }
 
-  function toast(msg, type = 'success') {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.className = 'show ' + type;
-    clearTimeout(el._t);
-    el._t = setTimeout(() => el.className = '', 2800);
-  }
+async function saveProduct() {
+  const name = document.getElementById('p_name').value.trim();
+  const category = document.getElementById('p_category').value.trim();
+  const description = document.getElementById('p_description').value.trim();
+  if (!name||!category||!description) { toast('Nombre, categoría y descripción requeridos','error'); return; }
+  const kw = document.getElementById('p_keywords').value.trim();
+  const keywords = kw ? kw.split(',').map(s=>s.trim()).filter(Boolean) : name.toLowerCase().split(' ');
+  const price = document.getElementById('p_price').value.trim() || undefined;
+  try {
+    if (editingProductId) await api('/admin/catalog/'+editingProductId, { method:'PUT', body:JSON.stringify({name,category,description,keywords,price}) });
+    else await api('/admin/catalog', { method:'POST', body:JSON.stringify({name,category,description,keywords,price}) });
+    toast(editingProductId ? 'Producto actualizado' : 'Producto agregado');
+    closeModal('productModal'); loadCatalog();
+  } catch(ex) { toast(ex.message,'error'); }
+}
 
-  function showTab(name) {
-    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['catalog','faqs','whatsapp','settings'][i] === name));
-    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
-    if (name === 'catalog') loadCatalog();
-    if (name === 'faqs') loadFaqs();
-    if (name === 'whatsapp') { loadWaStatus(); startWaPolling(); }
-    if (name === 'settings') { stopWaPolling(); loadSettings(); }
-    if (name !== 'whatsapp') stopWaPolling();
-  }
+async function deleteProduct(id, name) {
+  if (!confirm('¿Eliminar "'+name+'"?')) return;
+  await api('/admin/catalog/'+id, {method:'DELETE'});
+  toast('Eliminado'); loadCatalog();
+}
 
-  function openModal(id) { document.getElementById(id).classList.add('open'); }
-  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openScrapeModal() {
+  document.getElementById('scrape_url').value = '';
+  document.getElementById('scrape_result').style.display = 'none';
+  openModal('scrapeModal');
+}
 
-  document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
-
-  // ── CATALOG ──────────────────────────────────────────────────────────────────
-
-  async function loadCatalog() {
-    catalog = await api('/admin/catalog');
-    const tbody = document.getElementById('catalogBody');
-    document.getElementById('catalogCount').textContent = catalog.length + ' productos';
-    if (!catalog.length) {
-      tbody.innerHTML = '<tr><td colspan="4"><div class="empty"><p>No hay productos aún. Agrega el primero.</p></div></td></tr>';
-      return;
-    }
-    tbody.innerHTML = catalog.map(p => `
-      <tr>
-        <td>
-          <strong>${esc(p.name)}</strong>
-          <div style="color:#64748b;font-size:12px;margin-top:2px">${esc(p.description.slice(0,60))}${p.description.length>60?'…':''}</div>
-        </td>
-        <td><span class="badge">${esc(p.category)}</span></td>
-        <td style="color:#94a3b8">${p.price ? esc(p.price) : '—'}</td>
-        <td>
-          <button class="btn btn-secondary btn-sm" onclick="editProduct('${esc(p.id)}')">Editar</button>
-          <button class="btn btn-danger btn-sm" style="margin-left:6px" onclick="deleteProduct('${esc(p.id)}','${esc(p.name)}')">Eliminar</button>
-        </td>
-      </tr>
-    `).join('');
-
-    // populate category datalist
-    const cats = [...new Set(catalog.map(p => p.category))];
-    document.getElementById('categoryList').innerHTML = cats.map(c => `<option value="${esc(c)}">`).join('');
-  }
-
-  function openProductModal(id) {
-    editingProductId = id || null;
-    document.getElementById('productModalTitle').textContent = id ? 'Editar Producto' : 'Agregar Producto';
-    if (id) {
-      const p = catalog.find(x => x.id === id);
-      document.getElementById('p_name').value = p.name;
-      document.getElementById('p_category').value = p.category;
-      document.getElementById('p_price').value = p.price || '';
-      document.getElementById('p_description').value = p.description;
-      document.getElementById('p_keywords').value = (p.keywords || []).join(', ');
-    } else {
-      ['p_name','p_category','p_price','p_description','p_keywords'].forEach(id => document.getElementById(id).value = '');
-    }
-    openModal('productModal');
-  }
-
-  function editProduct(id) { openProductModal(id); }
-
-  async function saveProduct() {
-    const name = document.getElementById('p_name').value.trim();
-    const category = document.getElementById('p_category').value.trim();
-    const description = document.getElementById('p_description').value.trim();
-    if (!name || !category || !description) { toast('Nombre, categoría y descripción son requeridos', 'error'); return; }
-    const kwRaw = document.getElementById('p_keywords').value.trim();
-    const keywords = kwRaw ? kwRaw.split(',').map(s => s.trim()).filter(Boolean) : name.toLowerCase().split(' ');
-    const body = { name, category, description, keywords, price: document.getElementById('p_price').value.trim() || undefined };
-    try {
-      if (editingProductId) {
-        await api('/admin/catalog/' + editingProductId, { method: 'PUT', body: JSON.stringify(body) });
-        toast('Producto actualizado');
-      } else {
-        await api('/admin/catalog', { method: 'POST', body: JSON.stringify(body) });
-        toast('Producto agregado');
-      }
-      closeModal('productModal');
-      loadCatalog();
-    } catch (ex) { toast(ex.message, 'error'); }
-  }
-
-  async function deleteProduct(id, name) {
-    if (!confirm('¿Eliminar "' + name + '"?')) return;
-    await api('/admin/catalog/' + id, { method: 'DELETE' });
-    toast('Producto eliminado');
+async function runScrape() {
+  const url = document.getElementById('scrape_url').value.trim();
+  if (!url) { toast('Ingresa una URL','error'); return; }
+  const btn = document.getElementById('scrapeBtn');
+  btn.disabled = true; btn.textContent = 'Importando...';
+  const result = document.getElementById('scrape_result');
+  try {
+    const data = await api('/admin/scrape', { method:'POST', body:JSON.stringify({url}) });
+    result.style.display = '';
+    result.textContent = `✓ ${data.added} productos importados:\n${data.products.map(p=>`• ${p.name} [${p.category}]`).join('\n')}`;
+    toast(data.added + ' productos importados');
     loadCatalog();
+  } catch(ex) {
+    result.style.display = '';
+    result.textContent = '✗ ' + ex.message;
+    toast(ex.message,'error');
   }
+  btn.disabled = false; btn.textContent = 'Importar productos';
+}
 
-  // ── FAQS ─────────────────────────────────────────────────────────────────────
+// ── FAQS ──────────────────────────────────────────────────────────────────────
+async function loadFaqs() {
+  faqs = await api('/admin/faqs');
+  document.getElementById('faqCount').textContent = faqs.length + ' preguntas';
+  const tbody = document.getElementById('faqBody');
+  if (!faqs.length) { tbody.innerHTML = '<tr><td colspan="4"><div class="empty">Sin FAQs.</div></td></tr>'; return; }
+  tbody.innerHTML = faqs.map(f => `
+    <tr>
+      <td style="color:#64748b">${f.id}</td>
+      <td><strong>${esc(f.question)}</strong></td>
+      <td style="color:#94a3b8;font-size:13px">${esc(f.answer.slice(0,80))}${f.answer.length>80?'…':''}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteFaq(${f.id})">Eliminar</button></td>
+    </tr>`).join('');
+}
 
-  async function loadFaqs() {
-    faqs = await api('/admin/faqs');
-    const tbody = document.getElementById('faqBody');
-    document.getElementById('faqCount').textContent = faqs.length + ' preguntas';
-    if (!faqs.length) {
-      tbody.innerHTML = '<tr><td colspan="4"><div class="empty"><p>No hay FAQs aún.</p></div></td></tr>';
-      return;
-    }
-    tbody.innerHTML = faqs.map(f => `
-      <tr>
-        <td style="color:#64748b;font-size:13px">${f.id}</td>
-        <td><strong>${esc(f.question)}</strong></td>
-        <td style="color:#94a3b8;font-size:13px">${esc(f.answer.slice(0,80))}${f.answer.length>80?'…':''}</td>
-        <td><button class="btn btn-danger btn-sm" onclick="deleteFaq(${f.id},'${esc(f.question).replace(/'/g,"\\'")}')">Eliminar</button></td>
-      </tr>
-    `).join('');
+function openFaqModal() {
+  document.getElementById('f_question').value=''; document.getElementById('f_answer').value='';
+  openModal('faqModal');
+}
+
+async function saveFaq() {
+  const question = document.getElementById('f_question').value.trim();
+  const answer = document.getElementById('f_answer').value.trim();
+  if (!question||!answer) { toast('Pregunta y respuesta requeridas','error'); return; }
+  try {
+    await api('/admin/faqs', {method:'POST', body:JSON.stringify({question,answer})});
+    toast('FAQ agregada'); closeModal('faqModal'); loadFaqs();
+  } catch(ex) { toast(ex.message,'error'); }
+}
+
+async function deleteFaq(id) {
+  if (!confirm('¿Eliminar esta FAQ?')) return;
+  await api('/admin/faqs/'+id, {method:'DELETE'});
+  toast('FAQ eliminada'); loadFaqs();
+}
+
+// ── AI ────────────────────────────────────────────────────────────────────────
+async function loadAI() {
+  const ai = await api('/admin/ai');
+  document.getElementById('ai_enabled').checked = ai.enabled !== false;
+  document.getElementById('ai_model').value = ai.model || 'llama3.2:3b';
+  document.getElementById('ai_prompt').value = ai.prompt || '';
+}
+
+async function saveAI() {
+  const enabled = document.getElementById('ai_enabled').checked;
+  const model = document.getElementById('ai_model').value.trim();
+  const prompt = document.getElementById('ai_prompt').value.trim();
+  try {
+    await api('/admin/ai', {method:'PUT', body:JSON.stringify({enabled,model,prompt})});
+    toast('Configuración IA guardada');
+  } catch(ex) { toast(ex.message,'error'); }
+}
+
+async function testAI() {
+  const msg = document.getElementById('ai_test_msg').value.trim();
+  if (!msg) { toast('Escribe un mensaje de prueba','error'); return; }
+  const resultEl = document.getElementById('ai_test_result');
+  const outputEl = document.getElementById('ai_test_output');
+  resultEl.style.display = '';
+  outputEl.textContent = 'Consultando IA...';
+  try {
+    // First save current config, then test via a dummy message to the bot won't work directly
+    // We'll just show the prompt that would be sent
+    const ai = { enabled: document.getElementById('ai_enabled').checked, model: document.getElementById('ai_model').value, prompt: document.getElementById('ai_prompt').value };
+    outputEl.textContent = `Modelo: ${ai.model}\nIA habilitada: ${ai.enabled}\n\nEl mensaje "${msg}" sería procesado por el agente IA con el prompt configurado.`;
+  } catch(ex) { outputEl.textContent = '✗ ' + ex.message; }
+}
+
+// ── WHATSAPP ──────────────────────────────────────────────────────────────────
+const WA_COLORS = {
+  connected:    {bg:'#052e16',color:'#4ade80',label:'Conectado — el bot está activo'},
+  qr:           {bg:'#172554',color:'#60a5fa',label:'Esperando escaneo del QR...'},
+  initializing: {bg:'#1c1917',color:'#fbbf24',label:'Iniciando...'},
+  disconnected: {bg:'#1c0a0a',color:'#f87171',label:'Desconectado'},
+};
+
+async function loadWaStatus() {
+  try {
+    const d = await api('/admin/whatsapp/status');
+    const s = d.status || 'disconnected';
+    const c = WA_COLORS[s] || WA_COLORS.disconnected;
+    const badge = document.getElementById('wa-status-badge');
+    badge.textContent = s.charAt(0).toUpperCase()+s.slice(1);
+    badge.style.background = c.bg; badge.style.color = c.color;
+    document.getElementById('wa-status-label').textContent = c.label;
+    document.getElementById('wa-connect-btn').style.display = s==='disconnected'?'':'none';
+    document.getElementById('wa-logout-btn').style.display = s==='connected'?'':'none';
+    if (s==='qr') await loadWaQR(); else document.getElementById('wa-qr-container').style.display='none';
+  } catch {}
+}
+
+async function loadWaQR() {
+  try {
+    const d = await api('/admin/whatsapp/qr');
+    if (d?.qr) { document.getElementById('wa-qr-img').src=d.qr; document.getElementById('wa-qr-container').style.display=''; }
+  } catch {}
+}
+
+async function waConnect() { await api('/admin/whatsapp/connect',{method:'POST'}); toast('Iniciando... el QR aparecerá en segundos'); loadWaStatus(); }
+async function waLogout() { if(!confirm('¿Desconectar WhatsApp?')) return; await api('/admin/whatsapp/logout',{method:'POST'}); toast('Desconectado'); loadWaStatus(); }
+function startWaPolling() { stopWaPolling(); waPollingTimer = setInterval(loadWaStatus, 5000); }
+function stopWaPolling() { if(waPollingTimer) { clearInterval(waPollingTimer); waPollingTimer=null; } }
+
+// ── SETTINGS ──────────────────────────────────────────────────────────────────
+async function loadSettings() {
+  const s = await api('/admin/settings');
+  document.getElementById('s_storeName').value = s.storeName||'';
+  document.getElementById('s_username').value = s.username||'';
+  document.getElementById('s_websiteUrl').value = s.websiteUrl||'';
+  document.getElementById('s_logoUrl').value = s.logoUrl||'';
+  document.getElementById('s_phoneNumberId').value = s.phoneNumberId||'';
+  if (s.logoUrl) { const logo=document.getElementById('navLogo'); logo.src=s.logoUrl; logo.style.display=''; }
+}
+
+async function saveSettings(section) {
+  const body = {};
+  if (section==='store') {
+    body.storeName = document.getElementById('s_storeName').value.trim();
+    body.username = document.getElementById('s_username').value.trim();
+    body.websiteUrl = document.getElementById('s_websiteUrl').value.trim();
+    body.logoUrl = document.getElementById('s_logoUrl').value.trim();
+  } else if (section==='meta') {
+    const t=document.getElementById('s_whatsappToken').value.trim();
+    const p=document.getElementById('s_phoneNumberId').value.trim();
+    const v=document.getElementById('s_verifyToken').value.trim();
+    if (t) body.whatsappToken=t; if (p) body.phoneNumberId=p; if (v) body.verifyToken=v;
+    if (!Object.keys(body).length) { toast('Ingresa al menos un campo','error'); return; }
+  } else if (section==='password') {
+    const p1=document.getElementById('s_password').value;
+    const p2=document.getElementById('s_password2').value;
+    if (!p1) { toast('Ingresa la nueva contraseña','error'); return; }
+    if (p1!==p2) { toast('Las contraseñas no coinciden','error'); return; }
+    body.password=p1;
   }
+  try {
+    const data = await api('/admin/settings',{method:'PUT',body:JSON.stringify(body)});
+    if (data.storeName) { localStorage.setItem('wsp_store',data.storeName); document.getElementById('navStore').textContent=data.storeName; }
+    if (body.logoUrl) { const logo=document.getElementById('navLogo'); logo.src=body.logoUrl; logo.style.display=body.logoUrl?'':'none'; }
+    toast('Guardado correctamente');
+    if (section==='password') { document.getElementById('s_password').value=''; document.getElementById('s_password2').value=''; }
+  } catch(ex) { toast(ex.message,'error'); }
+}
 
-  function openFaqModal() {
-    document.getElementById('f_question').value = '';
-    document.getElementById('f_answer').value = '';
-    openModal('faqModal');
-  }
-
-  async function saveFaq() {
-    const question = document.getElementById('f_question').value.trim();
-    const answer = document.getElementById('f_answer').value.trim();
-    if (!question || !answer) { toast('Pregunta y respuesta son requeridas', 'error'); return; }
-    try {
-      await api('/admin/faqs', { method: 'POST', body: JSON.stringify({ question, answer }) });
-      toast('FAQ agregada');
-      closeModal('faqModal');
-      loadFaqs();
-    } catch (ex) { toast(ex.message, 'error'); }
-  }
-
-  async function deleteFaq(id, question) {
-    if (!confirm('¿Eliminar "' + question + '"?')) return;
-    await api('/admin/faqs/' + id, { method: 'DELETE' });
-    toast('FAQ eliminada');
-    loadFaqs();
-  }
-
-  // ── SETTINGS ─────────────────────────────────────────────────────────────────
-
-  async function loadSettings() {
-    const s = await api('/admin/settings');
-    document.getElementById('s_storeName').value = s.storeName || '';
-    document.getElementById('s_username').value = s.username || '';
-    document.getElementById('s_websiteUrl').value = s.websiteUrl || '';
-    document.getElementById('s_phoneNumberId').value = s.phoneNumberId || '';
-  }
-
-  async function saveSettings(section) {
-    const body = {};
-    if (section === 'store') {
-      body.storeName = document.getElementById('s_storeName').value.trim();
-      body.username = document.getElementById('s_username').value.trim();
-      body.websiteUrl = document.getElementById('s_websiteUrl').value.trim();
-    } else if (section === 'meta') {
-      const t = document.getElementById('s_whatsappToken').value.trim();
-      const p = document.getElementById('s_phoneNumberId').value.trim();
-      const v = document.getElementById('s_verifyToken').value.trim();
-      if (t) body.whatsappToken = t;
-      if (p) body.phoneNumberId = p;
-      if (v) body.verifyToken = v;
-      if (!Object.keys(body).length) { toast('Ingresa al menos un campo para actualizar', 'error'); return; }
-    } else if (section === 'password') {
-      const p1 = document.getElementById('s_password').value;
-      const p2 = document.getElementById('s_password2').value;
-      if (!p1) { toast('Ingresa la nueva contraseña', 'error'); return; }
-      if (p1 !== p2) { toast('Las contraseñas no coinciden', 'error'); return; }
-      body.password = p1;
-    }
-    try {
-      const data = await api('/admin/settings', { method: 'PUT', body: JSON.stringify(body) });
-      if (data.storeName) localStorage.setItem('wsp_store', data.storeName);
-      document.getElementById('navStore').textContent = data.storeName || '';
-      toast('Guardado correctamente');
-      if (section === 'password') { document.getElementById('s_password').value = ''; document.getElementById('s_password2').value = ''; }
-    } catch (ex) { toast(ex.message, 'error'); }
-  }
-
-  // ── ESCAPE ────────────────────────────────────────────────────────────────────
-
-  function esc(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  // ── WHATSAPP ──────────────────────────────────────────────────────────────────
-
-  let waPollingTimer = null;
-
-  const WA_COLORS = {
-    connected:    { bg: '#052e16', color: '#4ade80', label: 'Conectado — el bot está activo' },
-    qr:           { bg: '#172554', color: '#60a5fa', label: 'Esperando escaneo del QR...' },
-    initializing: { bg: '#1c1917', color: '#fbbf24', label: 'Iniciando...' },
-    disconnected: { bg: '#1c0a0a', color: '#f87171', label: 'Desconectado' },
-  };
-
-  async function loadWaStatus() {
-    try {
-      const data = await api('/admin/whatsapp/status');
-      const s = data.status || 'disconnected';
-      const c = WA_COLORS[s] || WA_COLORS.disconnected;
-
-      const badge = document.getElementById('wa-status-badge');
-      badge.textContent = s.charAt(0).toUpperCase() + s.slice(1);
-      badge.style.background = c.bg;
-      badge.style.color = c.color;
-      document.getElementById('wa-status-label').textContent = c.label;
-
-      document.getElementById('wa-connect-btn').style.display = s === 'disconnected' ? '' : 'none';
-      document.getElementById('wa-logout-btn').style.display = s === 'connected' ? '' : 'none';
-
-      if (s === 'qr') {
-        await loadWaQR();
-      } else {
-        document.getElementById('wa-qr-container').style.display = 'none';
-      }
-    } catch { /* ignore */ }
-  }
-
-  async function loadWaQR() {
-    try {
-      const data = await api('/admin/whatsapp/qr');
-      if (data?.qr) {
-        document.getElementById('wa-qr-img').src = data.qr;
-        document.getElementById('wa-qr-container').style.display = '';
-      }
-    } catch { /* ignore */ }
-  }
-
-  async function waConnect() {
-    await api('/admin/whatsapp/connect', { method: 'POST' });
-    toast('Iniciando conexión. El QR aparecerá en unos segundos...');
-    loadWaStatus();
-  }
-
-  async function waLogout() {
-    if (!confirm('¿Desconectar WhatsApp? El bot dejará de responder.')) return;
-    await api('/admin/whatsapp/logout', { method: 'POST' });
-    toast('WhatsApp desconectado');
-    loadWaStatus();
-  }
-
-  function startWaPolling() {
-    stopWaPolling();
-    waPollingTimer = setInterval(loadWaStatus, 5000);
-  }
-
-  function stopWaPolling() {
-    if (waPollingTimer) { clearInterval(waPollingTimer); waPollingTimer = null; }
-  }
-
-  // ── INIT ──────────────────────────────────────────────────────────────────────
-  loadCatalog();
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadStats();
 </script>
 </body>
 </html>

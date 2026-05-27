@@ -4,6 +4,7 @@ import { sendMainMenu } from './menuHandler';
 import { sendFaqList, handleFaqSelection } from './faqHandler';
 import { sendCategoryList, handleCategorySelection, handleProductSelection } from './catalogHandler';
 import { askOllama } from '../services/ollamaService';
+import { trackMessage, trackLead } from '../services/statsService';
 
 const GREETINGS = ['hola', 'hi', 'hello', 'buenos', 'buenas', 'inicio', 'start', 'menu', 'ayuda', 'help'];
 
@@ -15,6 +16,7 @@ async function route(tenant: Tenant, from: string, id: string): Promise<boolean>
   }
   if (id === 'menu_faq' || id === 'faq' || id === 'preguntas') { await sendFaqList(tenant, from); return true; }
   if (id === 'asesor' || id === 'menu_asesor') {
+    trackLead(tenant.id);
     await sendTextMessage(tenant, from, `Para hablar con un asesor de *${tenant.storeName}*, continúa escribiendo y un representante te atenderá.`);
     return true;
   }
@@ -27,6 +29,8 @@ async function route(tenant: Tenant, from: string, id: string): Promise<boolean>
 export async function handleMessage(tenant: Tenant, msg: WhatsAppMessage): Promise<void> {
   const { from, text } = msg;
   const normalized = text.toLowerCase().trim();
+
+  trackMessage(tenant.id, from);
 
   // Resolve numeric shortcut from last shown list
   if (/^\d+$/.test(normalized)) {
