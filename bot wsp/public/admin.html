@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — WhatsApp Bot</title>
+  <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui@5/dist/css/coreui.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
   <style>
     :root {
       --primary: #25d366;
@@ -11,143 +13,42 @@
       --on-primary: #0f172a;
       --primary-dim: rgba(37,211,102,0.13);
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
-
-    /* ── NAV ── */
-    nav { background: #1e293b; border-bottom: 1px solid #334155; padding: 0 16px; display: flex; align-items: center; height: 56px; gap: 10px; }
-    .nav-logo { width: 30px; height: 30px; border-radius: 7px; object-fit: cover; display: none; flex-shrink: 0; }
-    .nav-brand { font-weight: 700; color: var(--primary); font-size: 15px; margin-right: auto; white-space: nowrap; }
-    .nav-store { color: #94a3b8; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
-    .nav-logout { background: none; border: 1px solid #334155; color: #94a3b8; border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; flex-shrink: 0; }
-    .nav-logout:hover { color: #f1f5f9; border-color: #475569; }
-
-    /* ── TABS ── */
-    .tabs { display: flex; background: #1e293b; border-bottom: 1px solid #334155; padding: 0 12px; overflow-x: auto; scrollbar-width: none; }
-    .tabs::-webkit-scrollbar { display: none; }
-    .tab { padding: 14px 14px; font-size: 13px; font-weight: 500; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; flex-shrink: 0; }
-    .tab:hover { color: #cbd5e1; }
-    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-
-    /* ── CONTENT ── */
-    .content { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
-    .content.chat-mode { max-width: 100%; padding: 0; }
+    /* Sidebar */
+    .sidebar { background: #1e293b !important; }
+    .sidebar-brand { background: #162032 !important; border-bottom: 1px solid #334155 !important; }
+    .sidebar .nav-link { color: #94a3b8 !important; border-radius: 8px; margin: 1px 8px; padding: 8px 12px; }
+    .sidebar .nav-link:hover { color: #e2e8f0 !important; background: rgba(255,255,255,0.07) !important; }
+    .sidebar .nav-link.active { color: var(--primary) !important; background: var(--primary-dim) !important; }
+    .sidebar .nav-icon { color: inherit !important; font-size: 1rem; width: 1.25rem; }
+    .sidebar-footer { background: #1e293b !important; border-top: 1px solid #334155 !important; }
+    /* Header */
+    .header { background: #1e293b !important; border-bottom: 1px solid #334155 !important; }
+    /* Body */
+    body, .wrapper, .body { background: #0f172a !important; }
+    /* Panels */
     .panel { display: none; }
     .panel.active { display: block; }
-
-    /* ── SECTION HEADER ── */
-    .section-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
-    .section-header h2 { font-size: 19px; font-weight: 700; }
-    .section-header p { color: #64748b; font-size: 13px; margin-top: 2px; }
-
-    /* ── BUTTONS ── */
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; white-space: nowrap; }
-    .btn-primary { background: var(--primary); color: var(--on-primary); }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-secondary { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; }
-    .btn-secondary:hover { background: #334155; }
-    .btn-danger { background: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d; }
-    .btn-danger:hover { background: #7f1d1d; color: #fff; }
-    .btn-sm { padding: 4px 9px; font-size: 12px; }
-    .btn-purple { background: #4c1d95; color: #c4b5fd; border: 1px solid #6d28d9; }
-    .btn-purple:hover { background: #6d28d9; color: #fff; }
-
-    /* ── CARDS / TABLES ── */
-    .card { background: #1e293b; border-radius: 10px; border: 1px solid #334155; overflow: hidden; }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 480px; }
-    th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #334155; white-space: nowrap; }
-    td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid #1a2540; vertical-align: top; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #1a2540; }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-    .badge-gray { background: #0f172a; color: #94a3b8; border: 1px solid #334155; }
-    .badge-green { background: var(--primary-dim); color: var(--primary); }
-
-    /* ── SETTINGS CARDS ── */
-    .settings-card { background: #1e293b; border-radius: 10px; border: 1px solid #334155; padding: 20px; margin-bottom: 16px; }
-    .settings-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field.full { grid-column: 1 / -1; }
-    label { font-size: 13px; font-weight: 500; color: #94a3b8; }
-    input, select, textarea { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 9px 12px; color: #f1f5f9; font-size: 14px; outline: none; font-family: inherit; transition: border-color 0.15s; width: 100%; }
-    input:focus, select:focus, textarea:focus { border-color: var(--primary); }
-    textarea { resize: vertical; min-height: 90px; }
-    .hint { font-size: 12px; color: #475569; }
-
-    /* ── TOGGLE ── */
-    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #1a2540; }
-    .toggle-row:last-child { border-bottom: none; }
-    .toggle-label { font-size: 14px; font-weight: 500; }
-    .toggle-desc { font-size: 12px; color: #64748b; margin-top: 2px; }
-    .switch { position: relative; width: 42px; height: 24px; cursor: pointer; flex-shrink: 0; }
-    .switch input { display: none; }
-    .slider { position: absolute; inset: 0; background: #334155; border-radius: 24px; transition: background 0.2s; }
-    .slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
-    .switch input:checked + .slider { background: var(--primary); }
-    .switch input:checked + .slider::before { transform: translateX(18px); }
-
-    /* ── STATS ── */
-    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
-    .stat-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; text-align: center; }
-    .stat-num { font-size: 32px; font-weight: 800; color: var(--primary); line-height: 1; }
-    .stat-label { font-size: 12px; color: #64748b; margin-top: 6px; }
-
-    /* ── MODAL ── */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
-    .modal-overlay.open { display: flex; }
-    .modal { background: #1e293b; border-radius: 12px; border: 1px solid #334155; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
-    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #334155; }
-    .modal-header h3 { font-size: 15px; font-weight: 700; }
-    .modal-close { background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; padding: 2px 6px; }
-    .modal-body { padding: 20px; }
-    .modal-footer { padding: 12px 20px; border-top: 1px solid #334155; display: flex; justify-content: flex-end; gap: 10px; }
-
-    /* ── TOAST ── */
-    #toast { position: fixed; bottom: 20px; right: 20px; left: 20px; max-width: 340px; margin: 0 auto; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 11px 16px; font-size: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); transition: all 0.3s; opacity: 0; transform: translateY(10px); pointer-events: none; z-index: 300; }
-    #toast.show { opacity: 1; transform: translateY(0); }
-    #toast.success { border-color: var(--primary); color: var(--primary); }
-    #toast.error { border-color: #ef4444; color: #ef4444; }
-
-    /* ── MISC ── */
-    .empty { text-align: center; padding: 40px; color: #64748b; font-size: 14px; }
-    .code-block { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; color: #94a3b8; line-height: 1.6; white-space: pre-wrap; }
-
-    /* ── COLOR PICKER ── */
-    .color-presets { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
-    .color-swatch { width: 38px; height: 38px; border-radius: 8px; cursor: pointer; border: 3px solid transparent; transition: all 0.15s; flex-shrink: 0; }
-    .color-swatch:hover { transform: scale(1.12); }
-    .color-swatch.active { border-color: #fff; box-shadow: 0 0 0 2px #fff3; }
-    .color-input-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    input[type="color"] { width: 44px; height: 38px; padding: 2px 3px; cursor: pointer; border-radius: 8px; background: #0f172a; border: 1px solid #334155; flex-shrink: 0; }
-
-    /* ── SELLERS ── */
-    .seller-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #1a2540; }
-    .seller-item:last-child { border-bottom: none; }
-    .seller-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--primary-dim); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
-    .seller-name { flex: 1; font-size: 14px; font-weight: 500; }
-
-    /* ──────────────────────────────────────────────────────────
-       LIVE CHAT
-    ────────────────────────────────────────────────────────── */
-    .chat-layout { display: flex; height: calc(100vh - 104px); overflow: hidden; position: relative; }
-    .chat-sidebar { width: 300px; flex-shrink: 0; border-right: 1px solid #334155; display: flex; flex-direction: column; background: #1e293b; transition: transform 0.25s; }
-    .chat-sidebar-hdr { padding: 12px 14px; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-    .chat-sidebar-hdr span { font-weight: 700; font-size: 14px; }
+    /* Chat mode */
+    #mainBody.chat-mode { padding: 0 !important; overflow: hidden; display: flex; flex-direction: column; }
+    #mainBody.chat-mode > #mainContent { padding: 0 !important; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    #mainBody.chat-mode .panel.active { flex: 1; display: flex !important; flex-direction: column; overflow: hidden; }
+    /* Chat */
+    .chat-layout { flex: 1; display: flex; overflow: hidden; position: relative; }
+    .chat-sidebar { width: 300px; flex-shrink: 0; border-right: 1px solid #334155; display: flex; flex-direction: column; background: #1e293b; transition: transform .25s; }
+    .chat-sidebar-hdr { padding: 12px 14px; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; }
     .chat-conv-list { flex: 1; overflow-y: auto; }
-    .chat-conv-item { padding: 11px 14px; cursor: pointer; border-bottom: 1px solid #1a2540; display: flex; align-items: center; gap: 11px; transition: background 0.1s; }
+    .chat-conv-item { padding: 11px 14px; cursor: pointer; border-bottom: 1px solid #1a2540; display: flex; align-items: center; gap: 11px; transition: background .1s; }
     .chat-conv-item:hover { background: #243147; }
-    .chat-conv-item.active { background: #1a2a1a; }
+    .chat-conv-item.active { background: var(--primary-dim); }
     .chat-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: var(--on-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; }
     .chat-conv-info { flex: 1; min-width: 0; }
     .chat-conv-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .chat-conv-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
     .chat-conv-last { font-size: 12px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
-    .chat-unread { background: var(--primary); color: var(--on-primary); border-radius: 10px; min-width: 20px; height: 20px; padding: 0 5px; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .chat-unread { background: var(--primary); color: var(--on-primary); border-radius: 10px; min-width: 20px; height: 20px; padding: 0 5px; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
     .chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-    .chat-header { padding: 10px 14px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #1e293b; flex-shrink: 0; flex-wrap: wrap; }
-    .chat-back-btn { background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; padding: 2px 6px; display: none; flex-shrink: 0; }
+    .chat-header { padding: 10px 14px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #1e293b; flex-wrap: wrap; flex-shrink: 0; }
+    .chat-back-btn { background: none; border: none; color: #64748b; font-size: 22px; cursor: pointer; display: none; padding: 2px 6px; flex-shrink: 0; }
     .chat-back-btn:hover { color: #e2e8f0; }
     .chat-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 6px; background: #0d1b2a; }
     .chat-bubble-wrap { display: flex; flex-direction: column; }
@@ -160,325 +61,566 @@
     .chat-footer { padding: 10px 12px; border-top: 1px solid #334155; display: flex; gap: 8px; align-items: flex-end; background: #1e293b; flex-shrink: 0; }
     .chat-input { flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 20px; padding: 9px 14px; color: #f1f5f9; font-size: 14px; outline: none; font-family: inherit; resize: none; max-height: 120px; overflow-y: auto; line-height: 1.4; }
     .chat-input:focus { border-color: var(--primary); }
-    .chat-send-btn { background: var(--primary); color: var(--on-primary); border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
+    .chat-send-btn { background: var(--primary); color: var(--on-primary); border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .chat-send-btn:hover { background: var(--primary-hover); }
     .chat-empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #475569; gap: 10px; }
     .bot-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 700; white-space: nowrap; }
     .bot-on { background: var(--primary-dim); color: var(--primary); }
     .bot-off { background: #450a0a; color: #fca5a5; }
     .seller-select { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 5px 10px; color: #94a3b8; font-size: 12px; outline: none; cursor: pointer; max-width: 150px; }
-    .seller-select:focus { border-color: var(--primary); }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 1024px) { .chat-sidebar { width: 260px; } }
+    /* Custom buttons */
+    .btn-primary-custom { background: var(--primary) !important; color: var(--on-primary) !important; border-color: var(--primary) !important; }
+    .btn-primary-custom:hover { background: var(--primary-hover) !important; border-color: var(--primary-hover) !important; }
+    /* Cards */
+    .card-dark { background: #1e293b !important; border-color: #334155 !important; }
+    .card-dark .card-header { background: #162032 !important; border-color: #334155 !important; }
+    /* Forms */
+    .form-input { background: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+    .form-input:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 .2rem var(--primary-dim) !important; }
+    /* Switch accent */
+    .form-check-input:checked { background-color: var(--primary) !important; border-color: var(--primary) !important; }
+    /* Stat number */
+    .stat-num { font-size: 2.2rem; font-weight: 800; color: var(--primary); line-height: 1; }
+    /* Seller avatar */
+    .seller-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--primary-dim); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+    /* Color picker */
+    .color-presets { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+    .color-swatch { width: 38px; height: 38px; border-radius: 8px; cursor: pointer; border: 3px solid transparent; transition: all .15s; }
+    .color-swatch:hover { transform: scale(1.12); }
+    .color-swatch.active { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,.3); }
+    input[type="color"].color-pick { width: 44px; height: 38px; padding: 2px 3px; border-radius: 8px; background: #0f172a; border: 1px solid #334155; cursor: pointer; }
+    /* Code block */
+    .code-block { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; color: #94a3b8; white-space: pre-wrap; }
+    /* Modal overlay */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); display: none; align-items: center; justify-content: center; z-index: 1055; padding: 16px; }
+    .modal-overlay.open { display: flex; }
+    /* Toast */
+    #toast { position: fixed; bottom: 20px; right: 20px; left: 20px; max-width: 340px; margin: 0 auto; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 11px 16px; font-size: 14px; box-shadow: 0 8px 32px rgba(0,0,0,.4); transition: all .3s; opacity: 0; transform: translateY(10px); pointer-events: none; z-index: 1200; }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.success { border-color: var(--primary); color: var(--primary); }
+    #toast.error { border-color: #ef4444; color: #ef4444; }
+    /* WA status badge */
+    #wa-status-badge { font-size: .85rem; }
+    /* Responsive */
     @media (max-width: 768px) {
       .chat-sidebar { position: absolute; top: 0; left: 0; bottom: 0; width: 100%; z-index: 5; }
       .chat-sidebar.mobile-hidden { display: none; }
-      .chat-main { width: 100%; }
       .chat-back-btn { display: flex !important; }
-      .seller-select { max-width: 110px; }
-    }
-    @media (max-width: 640px) {
-      .content { padding: 16px 12px; }
-      .stat-grid { grid-template-columns: repeat(2, 1fr); }
-      .form-grid { grid-template-columns: 1fr; }
-      .section-header { flex-direction: column; }
-      .section-header > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
-      .modal { border-radius: 12px 12px 0 0; position: fixed; bottom: 0; left: 0; right: 0; max-width: 100%; max-height: 85vh; }
-      .modal-overlay { align-items: flex-end; padding: 0; }
-      table { min-width: 360px; }
-      td, th { padding: 9px 10px; font-size: 12px; }
-    }
-    @media (max-width: 400px) {
-      .nav-store { display: none; }
-      .stat-grid { grid-template-columns: 1fr; }
-      .stat-num { font-size: 26px; }
+      .seller-select { max-width: 100px; }
     }
   </style>
 </head>
 <body>
-<nav>
-  <img class="nav-logo" id="navLogo" src="" alt="" />
-  <div class="nav-brand">💬 Bot Admin</div>
-  <span class="nav-store" id="navStore"></span>
-  <button class="nav-logout" onclick="logout()">Salir</button>
-</nav>
-<div class="tabs">
-  <div class="tab active" onclick="showTab('stats')">Dashboard</div>
-  <div class="tab" onclick="showTab('chat')" id="tab-chat">Chat</div>
-  <div class="tab" onclick="showTab('catalog')">Catálogo</div>
-  <div class="tab" onclick="showTab('faqs')">FAQs</div>
-  <div class="tab" onclick="showTab('ai')">Agente IA</div>
-  <div class="tab" onclick="showTab('whatsapp')">WhatsApp</div>
-  <div class="tab" onclick="showTab('settings')">Config</div>
-</div>
-<div class="content" id="mainContent">
 
-  <!-- DASHBOARD -->
-  <div class="panel active" id="panel-stats">
-    <div class="section-header">
-      <div><h2>Dashboard</h2><p id="statsSubtitle">Actividad del bot</p></div>
-      <button class="btn btn-danger btn-sm" onclick="resetStats()">Reiniciar</button>
-    </div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="stat-num" id="st-messages">—</div><div class="stat-label">Mensajes</div></div>
-      <div class="stat-card"><div class="stat-num" id="st-conversations">—</div><div class="stat-label">Conversaciones</div></div>
-      <div class="stat-card"><div class="stat-num" id="st-leads" style="color:#fbbf24">—</div><div class="stat-label">Leads</div></div>
-    </div>
-    <div class="settings-card">
-      <h3>Resumen</h3>
-      <div id="statsInfo" style="color:#94a3b8;font-size:14px;line-height:1.8"></div>
-    </div>
+<!-- ── SIDEBAR ─────────────────────────────────────────────────────────────── -->
+<div class="sidebar sidebar-dark sidebar-fixed" id="sidebar">
+  <div class="sidebar-brand d-flex align-items-center px-3 py-3 gap-2">
+    <img id="navLogo" src="" alt="" style="width:28px;height:28px;border-radius:6px;object-fit:cover;display:none" />
+    <span class="fw-bold fs-6" style="color:var(--primary)">💬 Bot Admin</span>
   </div>
+  <div class="px-3 pt-2 pb-1">
+    <small class="text-secondary fw-semibold text-uppercase" style="font-size:10px;letter-spacing:.06em">Tienda</small>
+    <div class="text-light fw-semibold mt-1" id="navStore" style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+  </div>
+  <hr class="my-2" style="border-color:#334155" />
+  <ul class="sidebar-nav flex-grow-1">
+    <li class="nav-item">
+      <a class="nav-link active" href="#" data-tab="stats" onclick="showTab('stats');return false;">
+        <i class="nav-icon bi bi-speedometer2"></i>Dashboard
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" data-tab="chat" onclick="showTab('chat');return false;">
+        <i class="nav-icon bi bi-chat-dots"></i>Chat
+        <span class="badge bg-danger ms-auto" id="tab-chat-badge" style="display:none;font-size:10px"></span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" data-tab="catalog" onclick="showTab('catalog');return false;">
+        <i class="nav-icon bi bi-box-seam"></i>Catálogo
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" data-tab="faqs" onclick="showTab('faqs');return false;">
+        <i class="nav-icon bi bi-question-circle"></i>FAQs
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" data-tab="ai" onclick="showTab('ai');return false;">
+        <i class="nav-icon bi bi-robot"></i>Agente IA
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" data-tab="whatsapp" onclick="showTab('whatsapp');return false;">
+        <i class="nav-icon bi bi-whatsapp"></i>WhatsApp
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" data-tab="settings" onclick="showTab('settings');return false;">
+        <i class="nav-icon bi bi-gear"></i>Configuración
+      </a>
+    </li>
+  </ul>
+  <div class="sidebar-footer px-3 py-2">
+    <button class="btn btn-sm btn-outline-secondary w-100" onclick="logout()">
+      <i class="bi bi-box-arrow-right me-1"></i>Cerrar sesión
+    </button>
+  </div>
+</div>
 
-  <!-- CHAT EN VIVO -->
-  <div class="panel" id="panel-chat">
-    <div class="chat-layout">
-      <div class="chat-sidebar" id="chatSidebar">
-        <div class="chat-sidebar-hdr">
-          <span>Conversaciones <span id="chat-unread-total" style="color:var(--primary)"></span></span>
+<!-- ── WRAPPER ────────────────────────────────────────────────────────────── -->
+<div class="wrapper d-flex flex-column min-vh-100">
+  <header class="header header-sticky p-0">
+    <div class="container-fluid border-bottom px-3 d-flex align-items-center" style="border-color:#334155!important;height:56px">
+      <button class="header-toggler me-2" type="button" data-coreui-toggle="sidebar" data-coreui-target="#sidebar">
+        <span class="header-toggler-icon"></span>
+      </button>
+      <span class="fw-semibold text-secondary" style="font-size:13px" id="headerStore"></span>
+    </div>
+  </header>
+
+  <div class="body flex-grow-1" id="mainBody">
+    <div class="container-fluid p-4" id="mainContent">
+
+      <!-- ── DASHBOARD ──────────────────────────────────────────────────── -->
+      <div class="panel active" id="panel-stats">
+        <div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
+          <div>
+            <h4 class="fw-bold mb-1">Dashboard</h4>
+            <p class="text-secondary mb-0 small" id="statsSubtitle">Actividad del bot</p>
+          </div>
+          <button class="btn btn-sm btn-outline-danger" onclick="resetStats()">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar
+          </button>
         </div>
-        <div class="chat-conv-list" id="chat-conv-list">
-          <div class="empty" style="padding:24px;font-size:13px">Sin conversaciones aún.</div>
-        </div>
-      </div>
-      <div class="chat-main">
-        <div class="chat-empty-state" id="chat-select-hint">
-          <div style="font-size:36px">💬</div>
-          <div style="font-size:15px">Selecciona una conversación</div>
-        </div>
-        <div id="chat-thread" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden">
-          <div class="chat-header">
-            <button class="chat-back-btn" id="chatBackBtn" onclick="chatBack()">‹</button>
-            <div class="chat-avatar" id="chat-avatar-hdr">?</div>
-            <div style="flex:1;min-width:0">
-              <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="chat-name-hdr"></div>
-              <div style="font-size:11px;color:#64748b" id="chat-phone-hdr"></div>
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-md-4">
+            <div class="card card-dark h-100 text-center p-3">
+              <div class="stat-num" id="st-messages">—</div>
+              <div class="text-secondary small mt-1">Mensajes</div>
             </div>
-            <select class="seller-select" id="chat-seller-select" onchange="assignSeller()" title="Asignar vendedor">
-              <option value="">Sin asignar</option>
-            </select>
-            <span class="bot-badge bot-on" id="chat-bot-badge">Bot ON</span>
-            <label class="switch" title="Bot ON/OFF">
-              <input type="checkbox" id="chat-bot-toggle" onchange="toggleBot()" />
-              <span class="slider"></span>
-            </label>
           </div>
-          <div class="chat-messages" id="chat-messages"></div>
-          <div class="chat-footer">
-            <textarea class="chat-input" id="chat-input" rows="1"
-              placeholder="Responder como agente..." onkeydown="chatKeydown(event)" oninput="autoResize(this)"></textarea>
-            <button class="chat-send-btn" onclick="sendReply()" title="Enviar">&#10148;</button>
+          <div class="col-12 col-md-4">
+            <div class="card card-dark h-100 text-center p-3">
+              <div class="stat-num" id="st-conversations">—</div>
+              <div class="text-secondary small mt-1">Conversaciones</div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="card card-dark h-100 text-center p-3">
+              <div class="stat-num" style="color:#fbbf24" id="st-leads">—</div>
+              <div class="text-secondary small mt-1">Leads</div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CATALOG -->
-  <div class="panel" id="panel-catalog">
-    <div class="section-header">
-      <div><h2>Catálogo</h2><p id="catalogCount"></p></div>
-      <div>
-        <button class="btn btn-purple btn-sm" onclick="openScrapeModal()">🔗 Importar web</button>
-        <button class="btn btn-primary" onclick="openProductModal()">+ Agregar</button>
-      </div>
-    </div>
-    <div class="card"><div class="table-wrap">
-      <table><thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Acciones</th></tr></thead>
-      <tbody id="catalogBody"></tbody></table>
-    </div></div>
-  </div>
-
-  <!-- FAQS -->
-  <div class="panel" id="panel-faqs">
-    <div class="section-header">
-      <div><h2>Preguntas Frecuentes</h2><p id="faqCount"></p></div>
-      <button class="btn btn-primary" onclick="openFaqModal()">+ Agregar FAQ</button>
-    </div>
-    <div class="card"><div class="table-wrap">
-      <table><thead><tr><th>#</th><th>Pregunta</th><th>Respuesta</th><th></th></tr></thead>
-      <tbody id="faqBody"></tbody></table>
-    </div></div>
-  </div>
-
-  <!-- AI -->
-  <div class="panel" id="panel-ai">
-    <div class="section-header">
-      <div><h2>Agente IA</h2><p>Configura el comportamiento de la IA</p></div>
-      <button class="btn btn-primary" onclick="saveAI()">Guardar</button>
-    </div>
-    <div class="settings-card">
-      <div class="toggle-row">
-        <div><div class="toggle-label">IA habilitada</div><div class="toggle-desc">El bot usa Ollama para responder preguntas libres</div></div>
-        <label class="switch"><input type="checkbox" id="ai_enabled" /><span class="slider"></span></label>
-      </div>
-    </div>
-    <div class="settings-card">
-      <h3>Modelo</h3>
-      <div class="form-grid">
-        <div class="field">
-          <label>Modelo Ollama</label>
-          <input type="text" id="ai_model" placeholder="llama3.2:3b" />
-          <span class="hint">llama3.2:3b · llama3.1:8b · mistral · gemma2:9b</span>
+        <div class="card card-dark">
+          <div class="card-header fw-semibold small">Resumen</div>
+          <div class="card-body">
+            <div id="statsInfo" class="text-secondary" style="font-size:14px;line-height:1.8"></div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="settings-card">
-      <h3>Prompt del sistema</h3>
-      <p style="color:#64748b;font-size:13px;margin-bottom:12px">Variables: <code style="color:#a78bfa">{storeName}</code> <code style="color:#a78bfa">{catalog}</code> <code style="color:#a78bfa">{userMessage}</code></p>
-      <textarea id="ai_prompt" style="min-height:180px;font-family:monospace;font-size:13px" placeholder="Eres el asistente de {storeName}..."></textarea>
-    </div>
-    <div class="settings-card">
-      <h3>Probar IA</h3>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="ai_test_msg" placeholder="¿Qué productos tienen para diagnóstico?" style="flex:1" />
-        <button class="btn btn-secondary" onclick="testAI()">Probar</button>
-      </div>
-      <div id="ai_test_result" style="display:none;margin-top:12px">
-        <div class="code-block" id="ai_test_output"></div>
-      </div>
-    </div>
-  </div>
 
-  <!-- WHATSAPP -->
-  <div class="panel" id="panel-whatsapp">
-    <div class="section-header"><div><h2>Conexión WhatsApp</h2><p>Vincula tu número escaneando el QR</p></div></div>
-    <div class="settings-card">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-        <span id="wa-status-badge" style="padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700">—</span>
-        <span id="wa-status-label" style="color:#94a3b8;font-size:13px"></span>
-      </div>
-      <div id="wa-qr-container" style="display:none;text-align:center;margin-bottom:16px">
-        <p style="color:#94a3b8;font-size:13px;margin-bottom:10px">WhatsApp → Dispositivos vinculados → escanea:</p>
-        <img id="wa-qr-img" src="" alt="QR" style="width:200px;height:200px;border-radius:10px;border:2px solid #334155;max-width:100%" />
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-primary" id="wa-connect-btn" onclick="waConnect()" style="display:none">Conectar</button>
-        <button class="btn btn-danger" id="wa-logout-btn" onclick="waLogout()" style="display:none">Desconectar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- SETTINGS -->
-  <div class="panel" id="panel-settings">
-    <div class="section-header"><div><h2>Configuración</h2></div></div>
-
-    <!-- TEMA DE COLORES -->
-    <div class="settings-card">
-      <h3>🎨 Tema de colores</h3>
-      <p class="hint" style="margin-bottom:14px">Personaliza el color principal del panel de administración</p>
-      <div class="color-presets" id="colorPresets"></div>
-      <div class="color-input-wrap">
-        <label style="margin:0">Color personalizado:</label>
-        <input type="color" id="customColorPicker" value="#25d366" oninput="previewColor(this.value)" onchange="saveTheme(this.value)" title="Elige un color" />
-        <span id="colorHexLabel" style="font-family:monospace;font-size:13px;color:#94a3b8">#25d366</span>
-      </div>
-    </div>
-
-    <!-- VENDEDORES -->
-    <div class="settings-card">
-      <h3>👤 Vendedores / Agentes</h3>
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <input type="text" id="seller_name" placeholder="Nombre del vendedor" style="flex:1" onkeydown="if(event.key==='Enter')addSeller()" />
-        <button class="btn btn-primary" onclick="addSeller()">Agregar</button>
-      </div>
-      <div id="sellers-list"></div>
-      <p class="hint" style="margin-top:10px">Los vendedores aparecen en el Chat para asignar conversaciones</p>
-    </div>
-
-    <div class="settings-card">
-      <h3>Información de la tienda</h3>
-      <div class="form-grid">
-        <div class="field"><label>Nombre</label><input type="text" id="s_storeName" /></div>
-        <div class="field"><label>Usuario (login)</label><input type="text" id="s_username" /></div>
-        <div class="field full"><label>URL del sitio web</label><input type="url" id="s_websiteUrl" /></div>
-        <div class="field full">
-          <label>URL del logo</label>
-          <input type="url" id="s_logoUrl" placeholder="https://mitienda.com/logo.png" />
-          <span class="hint">URL pública PNG o JPG</span>
+      <!-- ── CHAT ───────────────────────────────────────────────────────── -->
+      <div class="panel" id="panel-chat">
+        <div class="chat-layout">
+          <div class="chat-sidebar" id="chatSidebar">
+            <div class="chat-sidebar-hdr">
+              <span class="fw-bold" style="font-size:14px">
+                Conversaciones <span id="chat-unread-total" style="color:var(--primary)"></span>
+              </span>
+            </div>
+            <div class="chat-conv-list" id="chat-conv-list">
+              <div class="text-center p-4 text-secondary small">Sin conversaciones aún.</div>
+            </div>
+          </div>
+          <div class="chat-main">
+            <div class="chat-empty-state" id="chat-select-hint">
+              <i class="bi bi-chat-dots" style="font-size:3rem;opacity:.25"></i>
+              <div style="font-size:15px">Selecciona una conversación</div>
+            </div>
+            <div id="chat-thread" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden">
+              <div class="chat-header">
+                <button class="chat-back-btn" id="chatBackBtn" onclick="chatBack()">‹</button>
+                <div class="chat-avatar" id="chat-avatar-hdr">?</div>
+                <div style="flex:1;min-width:0">
+                  <div class="fw-bold" style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="chat-name-hdr"></div>
+                  <div class="text-secondary" style="font-size:11px" id="chat-phone-hdr"></div>
+                </div>
+                <select class="seller-select" id="chat-seller-select" onchange="assignSeller()">
+                  <option value="">Sin asignar</option>
+                </select>
+                <span class="bot-badge bot-on" id="chat-bot-badge">Bot ON</span>
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" id="chat-bot-toggle" onchange="toggleBot()" style="cursor:pointer;width:38px;height:20px" />
+                </div>
+              </div>
+              <div class="chat-messages" id="chat-messages"></div>
+              <div class="chat-footer">
+                <textarea class="chat-input" id="chat-input" rows="1"
+                  placeholder="Responder como agente..." onkeydown="chatKeydown(event)" oninput="autoResize(this)"></textarea>
+                <button class="chat-send-btn" onclick="sendReply()">&#10148;</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <button class="btn btn-primary" style="margin-top:14px" onclick="saveSettings('store')">Guardar</button>
-    </div>
-    <div class="settings-card">
-      <h3>Credenciales WhatsApp (Meta API)</h3>
-      <div class="form-grid">
-        <div class="field full"><label>Token de acceso</label><input type="password" id="s_whatsappToken" placeholder="EAAemx..." /></div>
-        <div class="field"><label>Phone Number ID</label><input type="text" id="s_phoneNumberId" /></div>
-        <div class="field"><label>Verify Token</label><input type="text" id="s_verifyToken" /></div>
-      </div>
-      <button class="btn btn-primary" style="margin-top:14px" onclick="saveSettings('meta')">Guardar credenciales</button>
-    </div>
-    <div class="settings-card">
-      <h3>Cambiar contraseña</h3>
-      <div class="form-grid">
-        <div class="field"><label>Nueva contraseña</label><input type="password" id="s_password" /></div>
-        <div class="field"><label>Confirmar</label><input type="password" id="s_password2" /></div>
-      </div>
-      <button class="btn btn-primary" style="margin-top:14px" onclick="saveSettings('password')">Cambiar</button>
-    </div>
-  </div>
-</div>
 
-<!-- PRODUCT MODAL -->
+      <!-- ── CATÁLOGO ───────────────────────────────────────────────────── -->
+      <div class="panel" id="panel-catalog">
+        <div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
+          <div>
+            <h4 class="fw-bold mb-1">Catálogo</h4>
+            <p class="text-secondary mb-0 small" id="catalogCount"></p>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-sm" style="background:#4c1d95;color:#c4b5fd;border:1px solid #6d28d9" onclick="openScrapeModal()">
+              <i class="bi bi-link-45deg me-1"></i>Importar web
+            </button>
+            <button class="btn btn-sm btn-primary-custom" onclick="openProductModal()">
+              <i class="bi bi-plus-lg me-1"></i>Agregar
+            </button>
+          </div>
+        </div>
+        <div class="card card-dark">
+          <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0" style="--bs-table-bg:#1e293b;--bs-table-hover-bg:#243147;--bs-table-border-color:#334155">
+              <thead>
+                <tr>
+                  <th class="text-secondary fw-semibold small border-0">Nombre</th>
+                  <th class="text-secondary fw-semibold small border-0">Categoría</th>
+                  <th class="text-secondary fw-semibold small border-0">Precio</th>
+                  <th class="text-secondary fw-semibold small border-0">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="catalogBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FAQs ───────────────────────────────────────────────────────── -->
+      <div class="panel" id="panel-faqs">
+        <div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
+          <div>
+            <h4 class="fw-bold mb-1">Preguntas Frecuentes</h4>
+            <p class="text-secondary mb-0 small" id="faqCount"></p>
+          </div>
+          <button class="btn btn-sm btn-primary-custom" onclick="openFaqModal()">
+            <i class="bi bi-plus-lg me-1"></i>Agregar FAQ
+          </button>
+        </div>
+        <div class="card card-dark">
+          <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0" style="--bs-table-bg:#1e293b;--bs-table-hover-bg:#243147;--bs-table-border-color:#334155">
+              <thead>
+                <tr>
+                  <th class="text-secondary fw-semibold small border-0">#</th>
+                  <th class="text-secondary fw-semibold small border-0">Pregunta</th>
+                  <th class="text-secondary fw-semibold small border-0">Respuesta</th>
+                  <th class="border-0"></th>
+                </tr>
+              </thead>
+              <tbody id="faqBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AGENTE IA ──────────────────────────────────────────────────── -->
+      <div class="panel" id="panel-ai">
+        <div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
+          <div>
+            <h4 class="fw-bold mb-1">Agente IA</h4>
+            <p class="text-secondary mb-0 small">Configura el comportamiento de la IA</p>
+          </div>
+          <button class="btn btn-sm btn-primary-custom" onclick="saveAI()">
+            <i class="bi bi-check-lg me-1"></i>Guardar
+          </button>
+        </div>
+        <div class="card card-dark mb-3">
+          <div class="card-body d-flex align-items-center justify-content-between gap-3">
+            <div>
+              <div class="fw-semibold">IA habilitada</div>
+              <div class="text-secondary small">El bot usa Ollama para responder preguntas libres</div>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="ai_enabled" style="cursor:pointer;width:40px;height:22px" />
+            </div>
+          </div>
+        </div>
+        <div class="card card-dark mb-3">
+          <div class="card-header fw-semibold small">Modelo</div>
+          <div class="card-body">
+            <label class="form-label text-secondary small mb-1">Modelo Ollama</label>
+            <input type="text" class="form-control form-control-sm form-input" id="ai_model" placeholder="llama3.2:3b" style="max-width:280px" />
+            <div class="form-text text-secondary">llama3.2:3b · llama3.1:8b · mistral · gemma2:9b</div>
+          </div>
+        </div>
+        <div class="card card-dark mb-3">
+          <div class="card-header fw-semibold small">Prompt del sistema</div>
+          <div class="card-body">
+            <p class="text-secondary small mb-2">Variables: <code style="color:#a78bfa">{storeName}</code> <code style="color:#a78bfa">{catalog}</code> <code style="color:#a78bfa">{userMessage}</code></p>
+            <textarea class="form-control form-input" id="ai_prompt" rows="7"
+              style="font-family:monospace;font-size:13px;resize:vertical"
+              placeholder="Eres el asistente de {storeName}..."></textarea>
+          </div>
+        </div>
+        <div class="card card-dark">
+          <div class="card-header fw-semibold small">Probar IA</div>
+          <div class="card-body">
+            <div class="d-flex gap-2">
+              <input type="text" class="form-control form-control-sm form-input" id="ai_test_msg"
+                placeholder="¿Qué productos tienen para diagnóstico?" />
+              <button class="btn btn-sm btn-outline-secondary" onclick="testAI()">Probar</button>
+            </div>
+            <div id="ai_test_result" style="display:none" class="mt-3">
+              <div class="code-block" id="ai_test_output"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── WHATSAPP ────────────────────────────────────────────────────── -->
+      <div class="panel" id="panel-whatsapp">
+        <div class="mb-4">
+          <h4 class="fw-bold mb-1">Conexión WhatsApp</h4>
+          <p class="text-secondary small mb-0">Vincula tu número escaneando el QR</p>
+        </div>
+        <div class="card card-dark">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-3 mb-4">
+              <span id="wa-status-badge" class="badge fs-6 px-3 py-2">—</span>
+              <span id="wa-status-label" class="text-secondary small"></span>
+            </div>
+            <div id="wa-qr-container" style="display:none" class="text-center mb-4">
+              <p class="text-secondary small mb-2">WhatsApp → Dispositivos vinculados → escanea:</p>
+              <img id="wa-qr-img" src="" alt="QR" style="width:200px;height:200px;border-radius:10px;border:2px solid #334155;max-width:100%" />
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-sm btn-primary-custom" id="wa-connect-btn" onclick="waConnect()" style="display:none">
+                <i class="bi bi-phone me-1"></i>Conectar
+              </button>
+              <button class="btn btn-sm btn-outline-danger" id="wa-logout-btn" onclick="waLogout()" style="display:none">
+                <i class="bi bi-x-circle me-1"></i>Desconectar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CONFIGURACIÓN ──────────────────────────────────────────────── -->
+      <div class="panel" id="panel-settings">
+        <div class="mb-4">
+          <h4 class="fw-bold mb-1">Configuración</h4>
+        </div>
+
+        <div class="card card-dark mb-3">
+          <div class="card-header fw-semibold small">
+            <i class="bi bi-palette me-2" style="color:var(--primary)"></i>Tema de colores
+          </div>
+          <div class="card-body">
+            <p class="text-secondary small mb-3">Personaliza el color principal del panel</p>
+            <div class="color-presets" id="colorPresets"></div>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+              <label class="text-secondary small mb-0">Color personalizado:</label>
+              <input type="color" class="color-pick" id="customColorPicker" value="#25d366"
+                oninput="previewColor(this.value)" onchange="saveTheme(this.value)" />
+              <code id="colorHexLabel" class="text-secondary">#25d366</code>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-dark mb-3">
+          <div class="card-header fw-semibold small">
+            <i class="bi bi-people me-2" style="color:var(--primary)"></i>Vendedores / Agentes
+          </div>
+          <div class="card-body">
+            <div class="d-flex gap-2 mb-3">
+              <input type="text" class="form-control form-control-sm form-input" id="seller_name"
+                placeholder="Nombre del vendedor" onkeydown="if(event.key==='Enter')addSeller()" />
+              <button class="btn btn-sm btn-primary-custom" onclick="addSeller()">Agregar</button>
+            </div>
+            <div id="sellers-list"></div>
+            <p class="text-secondary small mt-2 mb-0">Los vendedores aparecen en Chat para asignar conversaciones</p>
+          </div>
+        </div>
+
+        <div class="card card-dark mb-3">
+          <div class="card-header fw-semibold small">
+            <i class="bi bi-shop me-2" style="color:var(--primary)"></i>Información de la tienda
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label text-secondary small mb-1">Nombre</label>
+                <input type="text" class="form-control form-control-sm form-input" id="s_storeName" />
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label text-secondary small mb-1">Usuario (login)</label>
+                <input type="text" class="form-control form-control-sm form-input" id="s_username" />
+              </div>
+              <div class="col-12">
+                <label class="form-label text-secondary small mb-1">URL del sitio web</label>
+                <input type="url" class="form-control form-control-sm form-input" id="s_websiteUrl" />
+              </div>
+              <div class="col-12">
+                <label class="form-label text-secondary small mb-1">URL del logo</label>
+                <input type="url" class="form-control form-control-sm form-input" id="s_logoUrl" placeholder="https://mitienda.com/logo.png" />
+                <div class="form-text text-secondary">URL pública PNG o JPG</div>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-primary-custom mt-3" onclick="saveSettings('store')">
+              <i class="bi bi-check-lg me-1"></i>Guardar
+            </button>
+          </div>
+        </div>
+
+        <div class="card card-dark mb-3">
+          <div class="card-header fw-semibold small">
+            <i class="bi bi-key me-2" style="color:var(--primary)"></i>Credenciales WhatsApp (Meta API)
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label text-secondary small mb-1">Token de acceso</label>
+                <input type="password" class="form-control form-control-sm form-input" id="s_whatsappToken" placeholder="EAAemx..." />
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label text-secondary small mb-1">Phone Number ID</label>
+                <input type="text" class="form-control form-control-sm form-input" id="s_phoneNumberId" />
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label text-secondary small mb-1">Verify Token</label>
+                <input type="text" class="form-control form-control-sm form-input" id="s_verifyToken" />
+              </div>
+            </div>
+            <button class="btn btn-sm btn-primary-custom mt-3" onclick="saveSettings('meta')">
+              <i class="bi bi-check-lg me-1"></i>Guardar credenciales
+            </button>
+          </div>
+        </div>
+
+        <div class="card card-dark">
+          <div class="card-header fw-semibold small">
+            <i class="bi bi-shield-lock me-2" style="color:var(--primary)"></i>Cambiar contraseña
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label text-secondary small mb-1">Nueva contraseña</label>
+                <input type="password" class="form-control form-control-sm form-input" id="s_password" />
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label text-secondary small mb-1">Confirmar</label>
+                <input type="password" class="form-control form-control-sm form-input" id="s_password2" />
+              </div>
+            </div>
+            <button class="btn btn-sm btn-primary-custom mt-3" onclick="saveSettings('password')">
+              <i class="bi bi-check-lg me-1"></i>Cambiar
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /mainContent -->
+  </div><!-- /mainBody -->
+</div><!-- /wrapper -->
+
+<!-- ── PRODUCT MODAL ──────────────────────────────────────────────────────── -->
 <div class="modal-overlay" id="productModal">
-  <div class="modal">
-    <div class="modal-header"><h3 id="productModalTitle">Agregar Producto</h3><button class="modal-close" onclick="closeModal('productModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="field full"><label>Nombre *</label><input type="text" id="p_name" /></div>
-        <div class="field"><label>Categoría *</label><input type="text" id="p_category" list="categoryList" /><datalist id="categoryList"></datalist></div>
-        <div class="field"><label>Precio</label><input type="text" id="p_price" placeholder="S/ 350" /></div>
-        <div class="field full"><label>Descripción *</label><textarea id="p_description"></textarea></div>
-        <div class="field full"><label>Palabras clave (coma)</label><input type="text" id="p_keywords" /></div>
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable w-100" style="max-width:520px">
+    <div class="modal-content card-dark" style="border-color:#334155">
+      <div class="modal-header" style="border-color:#334155;background:#162032">
+        <h5 class="modal-title fw-bold" id="productModalTitle">Agregar Producto</h5>
+        <button class="btn-close btn-close-white" onclick="closeModal('productModal')"></button>
       </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('productModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveProduct()">Guardar</button>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label text-secondary small mb-1">Nombre *</label>
+            <input type="text" class="form-control form-control-sm form-input" id="p_name" />
+          </div>
+          <div class="col-6">
+            <label class="form-label text-secondary small mb-1">Categoría *</label>
+            <input type="text" class="form-control form-control-sm form-input" id="p_category" list="categoryList" />
+            <datalist id="categoryList"></datalist>
+          </div>
+          <div class="col-6">
+            <label class="form-label text-secondary small mb-1">Precio</label>
+            <input type="text" class="form-control form-control-sm form-input" id="p_price" placeholder="S/ 350" />
+          </div>
+          <div class="col-12">
+            <label class="form-label text-secondary small mb-1">Descripción *</label>
+            <textarea class="form-control form-control-sm form-input" id="p_description" rows="3"></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label text-secondary small mb-1">Palabras clave (separadas por coma)</label>
+            <input type="text" class="form-control form-control-sm form-input" id="p_keywords" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-color:#334155;background:#162032">
+        <button class="btn btn-sm btn-outline-secondary" onclick="closeModal('productModal')">Cancelar</button>
+        <button class="btn btn-sm btn-primary-custom" onclick="saveProduct()">Guardar</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- FAQ MODAL -->
+<!-- ── FAQ MODAL ──────────────────────────────────────────────────────────── -->
 <div class="modal-overlay" id="faqModal">
-  <div class="modal">
-    <div class="modal-header"><h3>Agregar FAQ</h3><button class="modal-close" onclick="closeModal('faqModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-grid" style="grid-template-columns:1fr">
-        <div class="field"><label>Pregunta *</label><input type="text" id="f_question" /></div>
-        <div class="field"><label>Respuesta *</label><textarea id="f_answer" style="min-height:120px"></textarea></div>
+  <div class="modal-dialog modal-dialog-centered w-100" style="max-width:500px">
+    <div class="modal-content card-dark" style="border-color:#334155">
+      <div class="modal-header" style="border-color:#334155;background:#162032">
+        <h5 class="modal-title fw-bold">Agregar FAQ</h5>
+        <button class="btn-close btn-close-white" onclick="closeModal('faqModal')"></button>
       </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('faqModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveFaq()">Guardar</button>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label text-secondary small mb-1">Pregunta *</label>
+          <input type="text" class="form-control form-control-sm form-input" id="f_question" />
+        </div>
+        <div>
+          <label class="form-label text-secondary small mb-1">Respuesta *</label>
+          <textarea class="form-control form-input" id="f_answer" rows="5"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-color:#334155;background:#162032">
+        <button class="btn btn-sm btn-outline-secondary" onclick="closeModal('faqModal')">Cancelar</button>
+        <button class="btn btn-sm btn-primary-custom" onclick="saveFaq()">Guardar</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- SCRAPE MODAL -->
+<!-- ── SCRAPE MODAL ───────────────────────────────────────────────────────── -->
 <div class="modal-overlay" id="scrapeModal">
-  <div class="modal">
-    <div class="modal-header"><h3>Importar desde web</h3><button class="modal-close" onclick="closeModal('scrapeModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="field" style="margin-bottom:14px">
-        <label>URL del sitio web</label>
-        <input type="url" id="scrape_url" placeholder="https://mitienda.com/productos" />
-        <span class="hint">El bot extrae productos automáticamente</span>
+  <div class="modal-dialog modal-dialog-centered w-100" style="max-width:500px">
+    <div class="modal-content card-dark" style="border-color:#334155">
+      <div class="modal-header" style="border-color:#334155;background:#162032">
+        <h5 class="modal-title fw-bold">Importar desde web</h5>
+        <button class="btn-close btn-close-white" onclick="closeModal('scrapeModal')"></button>
       </div>
-      <div id="scrape_result" style="display:none" class="code-block"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('scrapeModal')">Cerrar</button>
-      <button class="btn btn-purple" id="scrapeBtn" onclick="runScrape()">Importar</button>
+      <div class="modal-body">
+        <label class="form-label text-secondary small mb-1">URL del sitio web</label>
+        <input type="url" class="form-control form-control-sm form-input mb-1" id="scrape_url" placeholder="https://mitienda.com/productos" />
+        <div class="form-text text-secondary mb-3">El bot extrae productos automáticamente</div>
+        <div id="scrape_result" style="display:none" class="code-block"></div>
+      </div>
+      <div class="modal-footer" style="border-color:#334155;background:#162032">
+        <button class="btn btn-sm btn-outline-secondary" onclick="closeModal('scrapeModal')">Cerrar</button>
+        <button class="btn btn-sm" style="background:#4c1d95;color:#c4b5fd;border:1px solid #6d28d9" id="scrapeBtn" onclick="runScrape()">
+          <i class="bi bi-download me-1"></i>Importar
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@coreui/coreui@5/dist/js/coreui.bundle.min.js"></script>
 <script>
 const token = localStorage.getItem('wsp_token');
 if (!token) location.href = '/';
@@ -486,34 +628,22 @@ if (!token) location.href = '/';
 let catalog = [], faqs = [], sellers = [], editingProductId = null, waPollingTimer = null;
 let chatConvs = [], chatPhone = null, chatEventSource = null;
 
-document.getElementById('navStore').textContent = localStorage.getItem('wsp_store') || '';
+const storeName = localStorage.getItem('wsp_store') || '';
+document.getElementById('navStore').textContent = storeName;
+document.getElementById('headerStore').textContent = storeName;
 
-// ── THEME ─────────────────────────────────────────────────────────────────────
+// ── THEME ──────────────────────────────────────────────────────────────────
 const COLOR_PRESETS = [
-  { color: '#25d366', name: 'WhatsApp' },
-  { color: '#3b82f6', name: 'Azul' },
-  { color: '#8b5cf6', name: 'Morado' },
-  { color: '#f97316', name: 'Naranja' },
-  { color: '#ef4444', name: 'Rojo' },
-  { color: '#14b8a6', name: 'Teal' },
-  { color: '#ec4899', name: 'Rosa' },
-  { color: '#eab308', name: 'Amarillo' },
-  { color: '#64748b', name: 'Gris' },
-  { color: '#0ea5e9', name: 'Celeste' },
+  { color: '#25d366', name: 'WhatsApp' }, { color: '#3b82f6', name: 'Azul' },
+  { color: '#8b5cf6', name: 'Morado' },   { color: '#f97316', name: 'Naranja' },
+  { color: '#ef4444', name: 'Rojo' },     { color: '#14b8a6', name: 'Teal' },
+  { color: '#ec4899', name: 'Rosa' },     { color: '#eab308', name: 'Amarillo' },
+  { color: '#64748b', name: 'Gris' },     { color: '#0ea5e9', name: 'Celeste' },
 ];
-
-function hexToRgb(hex) {
-  return { r: parseInt(hex.slice(1,3),16), g: parseInt(hex.slice(3,5),16), b: parseInt(hex.slice(5,7),16) };
-}
-function darken(hex, f=0.18) {
-  const {r,g,b} = hexToRgb(hex);
-  return '#'+[r,g,b].map(v=>Math.max(0,Math.round(v*(1-f))).toString(16).padStart(2,'0')).join('');
-}
-function luminance(hex) {
-  const {r,g,b} = hexToRgb(hex);
-  return [r,g,b].map(v=>{v/=255;return v<=0.03928?v/12.92:((v+0.055)/1.055)**2.4;}).reduce((s,v,i)=>s+v*[0.2126,0.7152,0.0722][i],0);
-}
-function toRgba(hex, a) { const {r,g,b}=hexToRgb(hex); return `rgba(${r},${g},${b},${a})`; }
+function hexToRgb(hex){return{r:parseInt(hex.slice(1,3),16),g:parseInt(hex.slice(3,5),16),b:parseInt(hex.slice(5,7),16)};}
+function darken(hex,f=0.18){const{r,g,b}=hexToRgb(hex);return'#'+[r,g,b].map(v=>Math.max(0,Math.round(v*(1-f))).toString(16).padStart(2,'0')).join('');}
+function luminance(hex){const{r,g,b}=hexToRgb(hex);return[r,g,b].map(v=>{v/=255;return v<=0.03928?v/12.92:((v+0.055)/1.055)**2.4;}).reduce((s,v,i)=>s+v*[0.2126,0.7152,0.0722][i],0);}
+function toRgba(hex,a){const{r,g,b}=hexToRgb(hex);return`rgba(${r},${g},${b},${a})`;}
 
 function applyTheme(color, save=false) {
   const root = document.documentElement;
@@ -523,74 +653,49 @@ function applyTheme(color, save=false) {
   root.style.setProperty('--primary-dim', toRgba(color, 0.13));
   document.getElementById('customColorPicker').value = color;
   document.getElementById('colorHexLabel').textContent = color;
-  // Update active swatch
-  document.querySelectorAll('.color-swatch').forEach(s => {
-    s.classList.toggle('active', s.dataset.color === color);
-  });
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.toggle('active', s.dataset.color === color));
   if (save) localStorage.setItem('wsp_theme', color);
 }
-
-function previewColor(color) {
-  if (/^#[0-9a-fA-F]{6}$/.test(color)) {
-    applyTheme(color);
-    document.getElementById('colorHexLabel').textContent = color;
-  }
-}
-
+function previewColor(color) { if (/^#[0-9a-fA-F]{6}$/.test(color)) applyTheme(color); }
 async function saveTheme(color) {
   if (!/^#[0-9a-fA-F]{6}$/.test(color)) return;
   applyTheme(color, true);
-  try {
-    await api('/admin/theme', { method: 'PUT', body: JSON.stringify({ primaryColor: color }) });
-    toast('Tema guardado');
-  } catch(ex) { toast(ex.message, 'error'); }
+  try { await api('/admin/theme', { method: 'PUT', body: JSON.stringify({ primaryColor: color }) }); toast('Tema guardado'); }
+  catch(ex) { toast(ex.message, 'error'); }
 }
-
 function renderColorPresets() {
-  const el = document.getElementById('colorPresets');
-  el.innerHTML = COLOR_PRESETS.map(p =>
-    `<div class="color-swatch" style="background:${p.color}" data-color="${p.color}"
-      title="${p.name}" onclick="saveTheme('${p.color}')"></div>`
+  document.getElementById('colorPresets').innerHTML = COLOR_PRESETS.map(p =>
+    `<div class="color-swatch" style="background:${p.color}" data-color="${p.color}" title="${p.name}" onclick="saveTheme('${p.color}')"></div>`
   ).join('');
 }
-
 async function loadTheme() {
   const cached = localStorage.getItem('wsp_theme');
   if (cached) applyTheme(cached);
-  try {
-    const t = await api('/admin/theme');
-    if (t.primaryColor) applyTheme(t.primaryColor, true);
-  } catch {}
+  try { const t = await api('/admin/theme'); if (t.primaryColor) applyTheme(t.primaryColor, true); } catch {}
 }
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
+// ── HELPERS ────────────────────────────────────────────────────────────────
 function logout() { localStorage.clear(); location.href = '/'; }
-
 function api(path, opts = {}) {
-  return fetch(path, {
-    ...opts,
-    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', ...(opts.headers||{}) },
-  }).then(async r => {
-    if (r.status === 401) { logout(); return; }
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || r.statusText);
-    return d;
-  });
+  return fetch(path, { ...opts, headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', ...(opts.headers||{}) } })
+    .then(async r => {
+      if (r.status === 401) { logout(); return; }
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || r.statusText);
+      return d;
+    });
 }
-
 function toast(msg, type = 'success') {
   const el = document.getElementById('toast');
   el.textContent = msg; el.className = 'show ' + type;
   clearTimeout(el._t); el._t = setTimeout(() => el.className = '', 2800);
 }
-
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function showTab(name) {
-  const tabs = ['stats','chat','catalog','faqs','ai','whatsapp','settings'];
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === name));
+  document.querySelectorAll('.sidebar .nav-link[data-tab]').forEach(l => l.classList.toggle('active', l.dataset.tab === name));
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
-  document.getElementById('mainContent').classList.toggle('chat-mode', name === 'chat');
+  document.getElementById('mainBody').classList.toggle('chat-mode', name === 'chat');
   if (name==='stats') loadStats();
   if (name==='chat') initChat();
   if (name==='catalog') loadCatalog();
@@ -604,7 +709,7 @@ function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
 
-// ── STATS ─────────────────────────────────────────────────────────────────────
+// ── STATS ──────────────────────────────────────────────────────────────────
 async function loadStats() {
   const s = await api('/admin/stats');
   document.getElementById('st-messages').textContent = s.messages || 0;
@@ -621,20 +726,23 @@ async function resetStats() {
   await api('/admin/stats/reset', { method: 'POST' }); toast('Reiniciado'); loadStats();
 }
 
-// ── CATALOG ───────────────────────────────────────────────────────────────────
+// ── CATALOG ────────────────────────────────────────────────────────────────
 async function loadCatalog() {
   catalog = await api('/admin/catalog');
   document.getElementById('catalogCount').textContent = catalog.length + ' productos';
   const tbody = document.getElementById('catalogBody');
-  if (!catalog.length) { tbody.innerHTML = '<tr><td colspan="4"><div class="empty">Sin productos.</div></td></tr>'; return; }
+  if (!catalog.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center text-secondary py-4">Sin productos.</td></tr>'; return; }
   tbody.innerHTML = catalog.map(p => `
     <tr>
-      <td><strong>${esc(p.name)}</strong><div style="color:#64748b;font-size:12px;margin-top:2px">${esc(p.description.slice(0,50))}${p.description.length>50?'…':''}</div></td>
-      <td><span class="badge badge-gray">${esc(p.category)}</span></td>
-      <td style="color:#94a3b8">${p.price?esc(p.price):'—'}</td>
+      <td>
+        <div class="fw-semibold">${esc(p.name)}</div>
+        <div class="text-secondary small">${esc(p.description.slice(0,50))}${p.description.length>50?'…':''}</div>
+      </td>
+      <td><span class="badge bg-secondary">${esc(p.category)}</span></td>
+      <td class="text-secondary">${p.price?esc(p.price):'—'}</td>
       <td style="white-space:nowrap">
-        <button class="btn btn-secondary btn-sm" onclick="editProduct('${esc(p.id)}')">Editar</button>
-        <button class="btn btn-danger btn-sm" style="margin-left:5px" onclick="deleteProduct('${esc(p.id)}','${esc(p.name)}')">Eliminar</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="editProduct('${esc(p.id)}')">Editar</button>
+        <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteProduct('${esc(p.id)}','${esc(p.name)}')">Eliminar</button>
       </td>
     </tr>`).join('');
   const cats = [...new Set(catalog.map(p=>p.category))];
@@ -668,15 +776,15 @@ async function runScrape() {
   const result=document.getElementById('scrape_result');
   try { const data=await api('/admin/scrape',{method:'POST',body:JSON.stringify({url})}); result.style.display=''; result.textContent=`✓ ${data.added} productos:\n${data.products.map(p=>`• ${p.name} [${p.category}]`).join('\n')}`; toast(data.added+' importados'); loadCatalog(); }
   catch(ex) { result.style.display=''; result.textContent='✗ '+ex.message; toast(ex.message,'error'); }
-  btn.disabled=false; btn.textContent='Importar';
+  btn.disabled=false; btn.innerHTML='<i class="bi bi-download me-1"></i>Importar';
 }
 
-// ── FAQS ──────────────────────────────────────────────────────────────────────
+// ── FAQS ───────────────────────────────────────────────────────────────────
 async function loadFaqs() {
   faqs=await api('/admin/faqs'); document.getElementById('faqCount').textContent=faqs.length+' preguntas';
   const tbody=document.getElementById('faqBody');
-  if(!faqs.length){tbody.innerHTML='<tr><td colspan="4"><div class="empty">Sin FAQs.</div></td></tr>';return;}
-  tbody.innerHTML=faqs.map(f=>`<tr><td style="color:#64748b">${f.id}</td><td><strong>${esc(f.question)}</strong></td><td style="color:#94a3b8;font-size:12px">${esc(f.answer.slice(0,80))}${f.answer.length>80?'…':''}</td><td><button class="btn btn-danger btn-sm" onclick="deleteFaq(${f.id})">Eliminar</button></td></tr>`).join('');
+  if(!faqs.length){tbody.innerHTML='<tr><td colspan="4" class="text-center text-secondary py-4">Sin FAQs.</td></tr>';return;}
+  tbody.innerHTML=faqs.map(f=>`<tr><td class="text-secondary">${f.id}</td><td><strong>${esc(f.question)}</strong></td><td class="text-secondary small">${esc(f.answer.slice(0,80))}${f.answer.length>80?'…':''}</td><td><button class="btn btn-sm btn-outline-danger" onclick="deleteFaq(${f.id})">Eliminar</button></td></tr>`).join('');
 }
 function openFaqModal() { document.getElementById('f_question').value=''; document.getElementById('f_answer').value=''; openModal('faqModal'); }
 async function saveFaq() {
@@ -687,7 +795,7 @@ async function saveFaq() {
 }
 async function deleteFaq(id) { if(!confirm('¿Eliminar?')) return; await api('/admin/faqs/'+id,{method:'DELETE'}); toast('Eliminada'); loadFaqs(); }
 
-// ── AI ────────────────────────────────────────────────────────────────────────
+// ── AI ─────────────────────────────────────────────────────────────────────
 async function loadAI() { const ai=await api('/admin/ai'); document.getElementById('ai_enabled').checked=ai.enabled!==false; document.getElementById('ai_model').value=ai.model||'llama3.2:3b'; document.getElementById('ai_prompt').value=ai.prompt||''; }
 async function saveAI() {
   const enabled=document.getElementById('ai_enabled').checked, model=document.getElementById('ai_model').value.trim(), prompt=document.getElementById('ai_prompt').value.trim();
@@ -699,7 +807,7 @@ async function testAI() {
   document.getElementById('ai_test_output').textContent=`Modelo: ${document.getElementById('ai_model').value}\nIA: ${document.getElementById('ai_enabled').checked?'ON':'OFF'}\n\nEl mensaje sería procesado con el prompt configurado.`;
 }
 
-// ── WHATSAPP ──────────────────────────────────────────────────────────────────
+// ── WHATSAPP ───────────────────────────────────────────────────────────────
 const WA_COLORS = { connected:{bg:'#052e16',color:'#4ade80',label:'Conectado'}, qr:{bg:'#172554',color:'#60a5fa',label:'Esperando QR...'}, initializing:{bg:'#1c1917',color:'#fbbf24',label:'Iniciando...'}, disconnected:{bg:'#1c0a0a',color:'#f87171',label:'Desconectado'} };
 async function loadWaStatus() {
   try { const d=await api('/admin/whatsapp/status'); const s=d.status||'disconnected'; const c=WA_COLORS[s]||WA_COLORS.disconnected;
@@ -716,7 +824,7 @@ async function waLogout() { if(!confirm('¿Desconectar?')) return; await api('/a
 function startWaPolling() { stopWaPolling(); waPollingTimer=setInterval(loadWaStatus,5000); }
 function stopWaPolling() { if(waPollingTimer){clearInterval(waPollingTimer);waPollingTimer=null;} }
 
-// ── SETTINGS ──────────────────────────────────────────────────────────────────
+// ── SETTINGS ───────────────────────────────────────────────────────────────
 async function loadSettings() {
   const s=await api('/admin/settings');
   document.getElementById('s_storeName').value=s.storeName||''; document.getElementById('s_username').value=s.username||'';
@@ -731,19 +839,24 @@ async function saveSettings(section) {
   else if(section==='password'){const p1=document.getElementById('s_password').value,p2=document.getElementById('s_password2').value;if(!p1){toast('Ingresa la contraseña','error');return;}if(p1!==p2){toast('Las contraseñas no coinciden','error');return;}body.password=p1;}
   try {
     const data=await api('/admin/settings',{method:'PUT',body:JSON.stringify(body)});
-    if(data.storeName){localStorage.setItem('wsp_store',data.storeName);document.getElementById('navStore').textContent=data.storeName;}
+    if(data.storeName){localStorage.setItem('wsp_store',data.storeName);document.getElementById('navStore').textContent=data.storeName;document.getElementById('headerStore').textContent=data.storeName;}
     if(body.logoUrl!==undefined){const logo=document.getElementById('navLogo');if(body.logoUrl){logo.src=body.logoUrl;logo.style.display='';}else logo.style.display='none';}
     toast('Guardado');
     if(section==='password'){document.getElementById('s_password').value='';document.getElementById('s_password2').value='';}
   } catch(ex){toast(ex.message,'error');}
 }
 
-// ── SELLERS ───────────────────────────────────────────────────────────────────
+// ── SELLERS ────────────────────────────────────────────────────────────────
 async function loadSellers() { sellers=await api('/admin/sellers'); renderSellers(); updateSellerSelect(); }
 function renderSellers() {
   const el=document.getElementById('sellers-list');
-  if(!sellers.length){el.innerHTML='<p style="color:#64748b;font-size:13px">Sin vendedores aún.</p>';return;}
-  el.innerHTML=sellers.map(s=>`<div class="seller-item"><div class="seller-avatar">${esc(s.charAt(0).toUpperCase())}</div><span class="seller-name">${esc(s)}</span><button class="btn btn-danger btn-sm" onclick="deleteSeller('${esc(s)}')">Eliminar</button></div>`).join('');
+  if(!sellers.length){el.innerHTML='<p class="text-secondary small mb-0">Sin vendedores aún.</p>';return;}
+  el.innerHTML=sellers.map(s=>`
+    <div class="d-flex align-items-center gap-2 py-2" style="border-bottom:1px solid #334155">
+      <div class="seller-avatar">${esc(s.charAt(0).toUpperCase())}</div>
+      <span class="flex-grow-1 fw-medium">${esc(s)}</span>
+      <button class="btn btn-sm btn-outline-danger" onclick="deleteSeller('${esc(s)}')">Eliminar</button>
+    </div>`).join('');
 }
 async function addSeller() {
   const name=document.getElementById('seller_name').value.trim(); if(!name){toast('Escribe el nombre','error');return;}
@@ -760,7 +873,7 @@ function updateSellerSelect() {
   if(cur) sel.value=cur;
 }
 
-// ── LIVE CHAT ─────────────────────────────────────────────────────────────────
+// ── LIVE CHAT ──────────────────────────────────────────────────────────────
 function initChat() {
   updateSellerSelect();
   if(chatEventSource&&chatEventSource.readyState!==EventSource.CLOSED) return;
@@ -773,21 +886,23 @@ function initChat() {
       if(conv){if(!conv.messages)conv.messages=[];conv.messages.push(data.message);if(conv.messages.length>100)conv.messages=conv.messages.slice(-100);conv.unread=data.unread;conv.botEnabled=data.botEnabled;conv.lastTs=data.message.ts;}
       else{conv={phone:data.phone,messages:[data.message],unread:data.unread,botEnabled:data.botEnabled,lastTs:data.message.ts};chatConvs.push(conv);}
       chatConvs.sort((a,b)=>(b.lastTs||0)-(a.lastTs||0));renderConvList();
-      if(data.phone===chatPhone){appendMessage(data.message);doMarkRead(data.phone);}else flashTabUnread();
+      if(data.phone===chatPhone){appendMessage(data.message);doMarkRead(data.phone);}else updateChatBadge();
     }
     else if(data.type==='bot_toggle'){const conv=chatConvs.find(c=>c.phone===data.phone);if(conv)conv.botEnabled=data.botEnabled;if(data.phone===chatPhone)updateBotBadge(data.botEnabled);renderConvList();}
     else if(data.type==='assign'){const conv=chatConvs.find(c=>c.phone===data.phone);if(conv)conv.assignedTo=data.assignedTo||undefined;if(data.phone===chatPhone)document.getElementById('chat-seller-select').value=data.assignedTo||'';renderConvList();}
   };
   chatEventSource.onerror=()=>{chatEventSource.close();chatEventSource=null;setTimeout(initChat,5000);};
 }
-function flashTabUnread(){const tab=document.getElementById('tab-chat');if(!tab.classList.contains('active')){const total=chatConvs.reduce((s,c)=>s+(c.unread||0),0);tab.textContent=total>0?`Chat (${total})`:'Chat';}}
-function renderConvList(){
+function updateChatBadge(){
   const total=chatConvs.reduce((s,c)=>s+(c.unread||0),0);
-  document.getElementById('chat-unread-total').textContent=total>0?`(${total})`:'';
-  const tab=document.getElementById('tab-chat');
-  if(!tab.classList.contains('active'))tab.textContent=total>0?`Chat (${total})`:'Chat'; else tab.textContent='Chat';
+  const badge=document.getElementById('tab-chat-badge');
+  if(badge){badge.textContent=total;badge.style.display=total>0?'':'none';}
+}
+function renderConvList(){
+  updateChatBadge();
   const el=document.getElementById('chat-conv-list');
-  if(!chatConvs.length){el.innerHTML='<div class="empty" style="padding:24px;font-size:13px">Sin conversaciones aún.</div>';return;}
+  document.getElementById('chat-unread-total').textContent=chatConvs.reduce((s,c)=>s+(c.unread||0),0)>0?`(${chatConvs.reduce((s,c)=>s+(c.unread||0),0)})`:'';
+  if(!chatConvs.length){el.innerHTML='<div class="text-center p-4 text-secondary small">Sin conversaciones aún.</div>';return;}
   el.innerHTML=chatConvs.map(c=>{
     const initial=(c.name||c.phone||'?').charAt(0).toUpperCase();
     const msgs=c.messages||[]; const lastMsg=msgs[msgs.length-1];
@@ -824,7 +939,7 @@ async function selectConv(phone){
 function chatBack(){document.getElementById('chatSidebar').classList.remove('mobile-hidden');document.getElementById('chat-thread').style.display='none';document.getElementById('chat-select-hint').style.display='';chatPhone=null;}
 function renderMessages(msgs){const el=document.getElementById('chat-messages');el.innerHTML=(msgs||[]).map(m=>bubbleHTML(m)).join('');el.scrollTop=el.scrollHeight;}
 function appendMessage(msg){const el=document.getElementById('chat-messages');el.insertAdjacentHTML('beforeend',bubbleHTML(msg));el.scrollTop=el.scrollHeight;}
-function bubbleHTML(msg){const d=new Date(msg.ts);const time=d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});return `<div class="chat-bubble-wrap ${msg.direction}"><div class="chat-bubble ${msg.direction}">${esc(msg.text)}</div><div class="chat-bubble-time">${time}</div></div>`;}
+function bubbleHTML(msg){const d=new Date(msg.ts);const time=d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});return`<div class="chat-bubble-wrap ${msg.direction}"><div class="chat-bubble ${msg.direction}">${esc(msg.text)}</div><div class="chat-bubble-time">${time}</div></div>`;}
 function updateBotBadge(enabled){const badge=document.getElementById('chat-bot-badge');badge.textContent=enabled?'Bot ON':'Bot OFF';badge.className='bot-badge '+(enabled?'bot-on':'bot-off');}
 async function toggleBot(){const enabled=document.getElementById('chat-bot-toggle').checked;updateBotBadge(enabled);const conv=chatConvs.find(c=>c.phone===chatPhone);if(conv)conv.botEnabled=enabled;renderConvList();try{await api('/admin/chat/bot/'+encodeURIComponent(chatPhone),{method:'POST',body:JSON.stringify({enabled})});}catch(ex){toast(ex.message,'error');}}
 async function assignSeller(){if(!chatPhone)return;const seller=document.getElementById('chat-seller-select').value||null;const conv=chatConvs.find(c=>c.phone===chatPhone);if(conv)conv.assignedTo=seller||undefined;renderConvList();try{await api('/admin/chat/assign/'+encodeURIComponent(chatPhone),{method:'POST',body:JSON.stringify({seller})});toast(seller?`Asignado a ${seller}`:'Asignación removida');}catch(ex){toast(ex.message,'error');}}
@@ -833,7 +948,7 @@ async function sendReply(){const inputEl=document.getElementById('chat-input');c
 function chatKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendReply();}}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+// ── INIT ───────────────────────────────────────────────────────────────────
 loadTheme();
 loadStats();
 </script>
