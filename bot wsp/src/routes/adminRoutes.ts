@@ -22,10 +22,11 @@ router.get('/settings', (req: AuthRequest, res: Response) => {
 
 // PUT /admin/settings
 router.put('/settings', async (req: AuthRequest, res: Response) => {
-  const { storeName, websiteUrl, password, whatsappToken, phoneNumberId, verifyToken } =
+  const { username, storeName, websiteUrl, password, whatsappToken, phoneNumberId, verifyToken } =
     req.body as Record<string, string>;
 
   const updates: Partial<typeof req.tenant> = {};
+  if (username) updates.username = username;
   if (storeName) updates.storeName = storeName;
   if (websiteUrl !== undefined) updates.websiteUrl = websiteUrl;
   if (whatsappToken) updates.whatsappToken = whatsappToken;
