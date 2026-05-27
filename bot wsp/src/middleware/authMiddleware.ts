@@ -28,6 +28,15 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
     return;
   }
 
+  const sub = tenant.subscription;
+  if (sub) {
+    const expired = new Date(sub.expiresAt) < new Date();
+    if (sub.status === 'suspended' || (sub.status !== 'trial' && expired)) {
+      res.status(402).json({ error: 'Suscripción inactiva. Contacta al administrador.' });
+      return;
+    }
+  }
+
   req.tenant = tenant;
   next();
 }

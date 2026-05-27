@@ -26,6 +26,26 @@ export interface TenantStats {
   leads: number;
 }
 
+export interface TenantPayment {
+  id: string;
+  date: string;
+  amount: number;
+  currency: string;
+  method: string;
+  note?: string;
+  period: string;
+}
+
+export interface TenantSubscription {
+  status: 'trial' | 'active' | 'expired' | 'suspended';
+  plan: string;
+  amount: number;
+  currency: string;
+  startDate: string;
+  expiresAt: string;
+  payments: TenantPayment[];
+}
+
 export interface Tenant {
   id: string;
   username: string;
@@ -42,6 +62,7 @@ export interface Tenant {
   stats?: TenantStats;
   sellers?: string[];
   theme?: { primaryColor: string };
+  subscription?: TenantSubscription;
   createdAt: string;
 }
 
