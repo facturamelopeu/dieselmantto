@@ -42,8 +42,16 @@ export async function askOllama(tenant: Tenant, userMessage: string): Promise<st
 
   const { data } = await axios.post(
     ollamaUrl,
-    { model, prompt, stream: false, options: { temperature: 0.4, num_predict: 200 } },
-    { timeout: 30000 }
+    {
+      model, prompt, stream: false,
+      options: {
+        temperature: 0.3,
+        num_predict: 120,
+        num_ctx: 1024,
+        stop: ['\nCliente:', '\nAsistente:', 'Cliente:'],
+      },
+    },
+    { timeout: 25000 }
   );
 
   return (data.response as string).trim();

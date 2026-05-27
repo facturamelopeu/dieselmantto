@@ -50,24 +50,35 @@ export async function handleMessage(tenant: Tenant, msg: WhatsAppMessage): Promi
     return;
   }
 
-  // Free text → Ollama with fallback to keyword search
+  // Free text → keyword search first (fast), Ollama only if no match
   if (normalized.length >= 3) {
-    try {
-      await sendTextMessage(tenant, from, 'Consultando...');
-      const reply = await askOllama(tenant, text);
-      await sendTextMessage(tenant, from, reply);
-    } catch {
-      const words = normalized.split(/\s+/);
-      const results = tenant.catalog.filter((p) => {
-        const searchable = [p.name, p.description, p.category, ...p.keywords].join(' ').toLowerCase();
-        return words.some((w) => searchable.includes(w));
-      });
-      if (results.length > 0) {
-        const lista = results.slice(0, 3).map((p) => `• *${p.name}* — ${p.description}`).join('\n\n');
-        await sendTextMessage(tenant, from, `Encontré estos productos:\n\n${lista}`);
-      } else {
-        await sendTextMessage(tenant, from, 'No encontré productos para tu búsqueda. Escribe *menu* para ver el catálogo completo.');
+    const words = normalized.split(/\s+/).filter((w) => w.length > 2);
+    const results = tenant.catalog.filter((p) => {
+      const searchable = [p.name, p.description, p.category, ...p.keywords].join(' ').toLowerCase();
+      return words.some((w) => searchable.includes(w));
+    });
+
+    if (results.length > 0) {
+      const lista = results.slice(0, 3).map((p) =>
+        `• *${p.name}* [${p.category}]${p.price ? ` — ${p.price}` : ''}\n  ${p.description}`
+      ).join('\n\n');
+      await sendTextMessage(tenant, from, `Encontré estos productos:\n\n${lista}`);
+      await sendMainMenu(tenant, from);
+      return;
+    }
+
+    // No keyword match → use Ollama for conversational reply
+    const ai = tenant.ai;
+    if (!ai || ai.enabled !== false) {
+      try {
+        await sendTextMessage(tenant, from, 'Consultando...');
+        const reply = await askOllama(tenant, text);
+        await sendTextMessage(tenant, from, reply);
+      } catch {
+        await sendTextMessage(tenant, from, 'No encontré información sobre eso. Escribe *menu* para ver las opciones disponibles.');
       }
+    } else {
+      await sendTextMessage(tenant, from, 'No encontré productos para tu búsqueda. Escribe *menu* para ver el catálogo completo.');
     }
     await sendMainMenu(tenant, from);
     return;
