@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import path from 'path';
 import { MetaWebhookBody, WhatsAppMessage } from '../types';
 import { handleMessage } from '../handlers/messageHandler';
 import * as tenantService from '../services/tenantService';
@@ -7,6 +8,7 @@ import adminRoutes from '../routes/adminRoutes';
 
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '../../public')));
 
 // Auth & admin API
 app.use('/auth', authRoutes);

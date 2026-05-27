@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — WhatsApp Bot</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+
+    /* NAV */
+    nav { background: #1e293b; border-bottom: 1px solid #334155; padding: 0 24px; display: flex; align-items: center; height: 56px; gap: 8px; }
+    .nav-brand { font-weight: 700; color: #25d366; font-size: 16px; margin-right: auto; display: flex; align-items: center; gap: 8px; }
+    .nav-store { color: #94a3b8; font-size: 13px; }
+    .nav-logout { background: none; border: 1px solid #334155; color: #94a3b8; border-radius: 6px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+    .nav-logout:hover { color: #f1f5f9; border-color: #475569; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 0; background: #1e293b; border-bottom: 1px solid #334155; padding: 0 24px; }
+    .tab { padding: 14px 20px; font-size: 14px; font-weight: 500; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+    .tab:hover { color: #cbd5e1; }
+    .tab.active { color: #25d366; border-bottom-color: #25d366; }
+
+    /* CONTENT */
+    .content { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* SECTION HEADER */
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .section-header h2 { font-size: 20px; font-weight: 700; }
+    .section-header p { color: #64748b; font-size: 13px; margin-top: 2px; }
+
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; }
+    .btn-primary { background: #25d366; color: #0f172a; }
+    .btn-primary:hover { background: #1fba56; }
+    .btn-secondary { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; }
+    .btn-secondary:hover { background: #334155; }
+    .btn-danger { background: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d; }
+    .btn-danger:hover { background: #7f1d1d; color: #fff; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+    /* CARD */
+    .card { background: #1e293b; border-radius: 10px; border: 1px solid #334155; }
+    .card-body { padding: 20px; }
+
+    /* TABLE */
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 10px 14px; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #334155; }
+    td { padding: 12px 14px; font-size: 14px; border-bottom: 1px solid #1e293b; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #1a2540; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #0f172a; color: #94a3b8; border: 1px solid #334155; }
+
+    /* FORM */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid.cols-1 { grid-template-columns: 1fr; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    label { font-size: 13px; font-weight: 500; color: #94a3b8; }
+    input, select, textarea {
+      background: #0f172a; border: 1px solid #334155; border-radius: 8px;
+      padding: 9px 12px; color: #f1f5f9; font-size: 14px; outline: none;
+      transition: border-color 0.15s; font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #25d366; }
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #1e293b; border-radius: 12px; border: 1px solid #334155; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #334155; }
+    .modal-header h3 { font-size: 16px; font-weight: 700; }
+    .modal-close { background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; line-height: 1; }
+    .modal-body { padding: 24px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid #334155; display: flex; justify-content: flex-end; gap: 10px; }
+
+    /* TOAST */
+    #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 12px 18px; font-size: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); transition: all 0.3s; opacity: 0; transform: translateY(10px); pointer-events: none; z-index: 200; }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.success { border-color: #25d366; color: #25d366; }
+    #toast.error { border-color: #ef4444; color: #ef4444; }
+
+    /* SETTINGS */
+    .settings-card { background: #1e293b; border-radius: 10px; border: 1px solid #334155; padding: 24px; margin-bottom: 20px; }
+    .settings-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 20px; color: #f1f5f9; }
+
+    /* EMPTY STATE */
+    .empty { text-align: center; padding: 48px; color: #64748b; }
+    .empty p { font-size: 15px; margin-top: 8px; }
+
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .content { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">💬 WhatsApp Bot</div>
+  <span class="nav-store" id="navStore"></span>
+  <button class="nav-logout" onclick="logout()">Salir</button>
+</nav>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('catalog')">Catálogo</div>
+  <div class="tab" onclick="showTab('faqs')">FAQs</div>
+  <div class="tab" onclick="showTab('settings')">Configuración</div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- CATALOG PANEL -->
+  <div class="panel active" id="panel-catalog">
+    <div class="section-header">
+      <div>
+        <h2>Catálogo de Productos</h2>
+        <p id="catalogCount"></p>
+      </div>
+      <button class="btn btn-primary" onclick="openProductModal()">+ Agregar Producto</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="catalogBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FAQS PANEL -->
+  <div class="panel" id="panel-faqs">
+    <div class="section-header">
+      <div>
+        <h2>Preguntas Frecuentes</h2>
+        <p id="faqCount"></p>
+      </div>
+      <button class="btn btn-primary" onclick="openFaqModal()">+ Agregar FAQ</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Pregunta</th>
+            <th>Respuesta</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="faqBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SETTINGS PANEL -->
+  <div class="panel" id="panel-settings">
+    <div class="section-header">
+      <div><h2>Configuración</h2></div>
+    </div>
+
+    <div class="settings-card">
+      <h3>Información de la Tienda</h3>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nombre de la tienda</label>
+          <input type="text" id="s_storeName" placeholder="Mi Tienda" />
+        </div>
+        <div class="field">
+          <label>Usuario (login)</label>
+          <input type="text" id="s_username" placeholder="admin@empresa" />
+        </div>
+        <div class="field full">
+          <label>URL del sitio web</label>
+          <input type="url" id="s_websiteUrl" placeholder="https://mitienda.com" />
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:18px" onclick="saveSettings('store')">Guardar cambios</button>
+    </div>
+
+    <div class="settings-card">
+      <h3>Credenciales WhatsApp (Meta)</h3>
+      <div class="form-grid">
+        <div class="field full">
+          <label>Token de acceso (WhatsApp)</label>
+          <input type="password" id="s_whatsappToken" placeholder="EAAemx..." autocomplete="new-password" />
+        </div>
+        <div class="field">
+          <label>Phone Number ID</label>
+          <input type="text" id="s_phoneNumberId" placeholder="994411380422057" />
+        </div>
+        <div class="field">
+          <label>Verify Token (webhook)</label>
+          <input type="text" id="s_verifyToken" placeholder="verify_empresa_2024" />
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:18px" onclick="saveSettings('meta')">Guardar credenciales</button>
+    </div>
+
+    <div class="settings-card">
+      <h3>Cambiar Contraseña</h3>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nueva contraseña</label>
+          <input type="password" id="s_password" placeholder="••••••••" autocomplete="new-password" />
+        </div>
+        <div class="field">
+          <label>Confirmar contraseña</label>
+          <input type="password" id="s_password2" placeholder="••••••••" autocomplete="new-password" />
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:18px" onclick="saveSettings('password')">Cambiar contraseña</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="productModalTitle">Agregar Producto</h3>
+      <button class="modal-close" onclick="closeModal('productModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field full">
+          <label>Nombre *</label>
+          <input type="text" id="p_name" placeholder="Ej: GPS Tracker 4G" />
+        </div>
+        <div class="field">
+          <label>Categoría *</label>
+          <input type="text" id="p_category" placeholder="Ej: Seguridad Minera" list="categoryList" />
+          <datalist id="categoryList"></datalist>
+        </div>
+        <div class="field">
+          <label>Precio</label>
+          <input type="text" id="p_price" placeholder="Ej: S/ 350" />
+        </div>
+        <div class="field full">
+          <label>Descripción *</label>
+          <textarea id="p_description" placeholder="Descripción del producto..."></textarea>
+        </div>
+        <div class="field full">
+          <label>Palabras clave (separadas por coma)</label>
+          <input type="text" id="p_keywords" placeholder="gps, rastreo, 4g, tracker" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('productModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ MODAL -->
+<div class="modal-overlay" id="faqModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Agregar Pregunta Frecuente</h3>
+      <button class="modal-close" onclick="closeModal('faqModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid cols-1">
+        <div class="field">
+          <label>Pregunta *</label>
+          <input type="text" id="f_question" placeholder="¿Cuál es el horario de atención?" />
+        </div>
+        <div class="field">
+          <label>Respuesta *</label>
+          <textarea id="f_answer" style="min-height:120px" placeholder="Atendemos de lunes a viernes de 9am a 6pm..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('faqModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveFaq()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+  const API = '';
+  let token = localStorage.getItem('wsp_token');
+  let editingProductId = null;
+  let catalog = [];
+  let faqs = [];
+
+  if (!token) location.href = '/';
+
+  document.getElementById('navStore').textContent = localStorage.getItem('wsp_store') || '';
+
+  // ── HELPERS ──────────────────────────────────────────────────────────────────
+
+  function logout() {
+    localStorage.removeItem('wsp_token');
+    localStorage.removeItem('wsp_store');
+    location.href = '/';
+  }
+
+  function api(path, opts = {}) {
+    return fetch(API + path, {
+      ...opts,
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', ...(opts.headers || {}) },
+    }).then(async (r) => {
+      if (r.status === 401) { logout(); return; }
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || r.statusText);
+      return data;
+    });
+  }
+
+  function toast(msg, type = 'success') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'show ' + type;
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.className = '', 2800);
+  }
+
+  function showTab(name) {
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['catalog','faqs','settings'][i] === name));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+    if (name === 'catalog') loadCatalog();
+    if (name === 'faqs') loadFaqs();
+    if (name === 'settings') loadSettings();
+  }
+
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+  document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+  // ── CATALOG ──────────────────────────────────────────────────────────────────
+
+  async function loadCatalog() {
+    catalog = await api('/admin/catalog');
+    const tbody = document.getElementById('catalogBody');
+    document.getElementById('catalogCount').textContent = catalog.length + ' productos';
+    if (!catalog.length) {
+      tbody.innerHTML = '<tr><td colspan="4"><div class="empty"><p>No hay productos aún. Agrega el primero.</p></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = catalog.map(p => `
+      <tr>
+        <td>
+          <strong>${esc(p.name)}</strong>
+          <div style="color:#64748b;font-size:12px;margin-top:2px">${esc(p.description.slice(0,60))}${p.description.length>60?'…':''}</div>
+        </td>
+        <td><span class="badge">${esc(p.category)}</span></td>
+        <td style="color:#94a3b8">${p.price ? esc(p.price) : '—'}</td>
+        <td>
+          <button class="btn btn-secondary btn-sm" onclick="editProduct('${esc(p.id)}')">Editar</button>
+          <button class="btn btn-danger btn-sm" style="margin-left:6px" onclick="deleteProduct('${esc(p.id)}','${esc(p.name)}')">Eliminar</button>
+        </td>
+      </tr>
+    `).join('');
+
+    // populate category datalist
+    const cats = [...new Set(catalog.map(p => p.category))];
+    document.getElementById('categoryList').innerHTML = cats.map(c => `<option value="${esc(c)}">`).join('');
+  }
+
+  function openProductModal(id) {
+    editingProductId = id || null;
+    document.getElementById('productModalTitle').textContent = id ? 'Editar Producto' : 'Agregar Producto';
+    if (id) {
+      const p = catalog.find(x => x.id === id);
+      document.getElementById('p_name').value = p.name;
+      document.getElementById('p_category').value = p.category;
+      document.getElementById('p_price').value = p.price || '';
+      document.getElementById('p_description').value = p.description;
+      document.getElementById('p_keywords').value = (p.keywords || []).join(', ');
+    } else {
+      ['p_name','p_category','p_price','p_description','p_keywords'].forEach(id => document.getElementById(id).value = '');
+    }
+    openModal('productModal');
+  }
+
+  function editProduct(id) { openProductModal(id); }
+
+  async function saveProduct() {
+    const name = document.getElementById('p_name').value.trim();
+    const category = document.getElementById('p_category').value.trim();
+    const description = document.getElementById('p_description').value.trim();
+    if (!name || !category || !description) { toast('Nombre, categoría y descripción son requeridos', 'error'); return; }
+    const kwRaw = document.getElementById('p_keywords').value.trim();
+    const keywords = kwRaw ? kwRaw.split(',').map(s => s.trim()).filter(Boolean) : name.toLowerCase().split(' ');
+    const body = { name, category, description, keywords, price: document.getElementById('p_price').value.trim() || undefined };
+    try {
+      if (editingProductId) {
+        await api('/admin/catalog/' + editingProductId, { method: 'PUT', body: JSON.stringify(body) });
+        toast('Producto actualizado');
+      } else {
+        await api('/admin/catalog', { method: 'POST', body: JSON.stringify(body) });
+        toast('Producto agregado');
+      }
+      closeModal('productModal');
+      loadCatalog();
+    } catch (ex) { toast(ex.message, 'error'); }
+  }
+
+  async function deleteProduct(id, name) {
+    if (!confirm('¿Eliminar "' + name + '"?')) return;
+    await api('/admin/catalog/' + id, { method: 'DELETE' });
+    toast('Producto eliminado');
+    loadCatalog();
+  }
+
+  // ── FAQS ─────────────────────────────────────────────────────────────────────
+
+  async function loadFaqs() {
+    faqs = await api('/admin/faqs');
+    const tbody = document.getElementById('faqBody');
+    document.getElementById('faqCount').textContent = faqs.length + ' preguntas';
+    if (!faqs.length) {
+      tbody.innerHTML = '<tr><td colspan="4"><div class="empty"><p>No hay FAQs aún.</p></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = faqs.map(f => `
+      <tr>
+        <td style="color:#64748b;font-size:13px">${f.id}</td>
+        <td><strong>${esc(f.question)}</strong></td>
+        <td style="color:#94a3b8;font-size:13px">${esc(f.answer.slice(0,80))}${f.answer.length>80?'…':''}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteFaq(${f.id},'${esc(f.question).replace(/'/g,"\\'")}')">Eliminar</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function openFaqModal() {
+    document.getElementById('f_question').value = '';
+    document.getElementById('f_answer').value = '';
+    openModal('faqModal');
+  }
+
+  async function saveFaq() {
+    const question = document.getElementById('f_question').value.trim();
+    const answer = document.getElementById('f_answer').value.trim();
+    if (!question || !answer) { toast('Pregunta y respuesta son requeridas', 'error'); return; }
+    try {
+      await api('/admin/faqs', { method: 'POST', body: JSON.stringify({ question, answer }) });
+      toast('FAQ agregada');
+      closeModal('faqModal');
+      loadFaqs();
+    } catch (ex) { toast(ex.message, 'error'); }
+  }
+
+  async function deleteFaq(id, question) {
+    if (!confirm('¿Eliminar "' + question + '"?')) return;
+    await api('/admin/faqs/' + id, { method: 'DELETE' });
+    toast('FAQ eliminada');
+    loadFaqs();
+  }
+
+  // ── SETTINGS ─────────────────────────────────────────────────────────────────
+
+  async function loadSettings() {
+    const s = await api('/admin/settings');
+    document.getElementById('s_storeName').value = s.storeName || '';
+    document.getElementById('s_username').value = s.username || '';
+    document.getElementById('s_websiteUrl').value = s.websiteUrl || '';
+    document.getElementById('s_phoneNumberId').value = s.phoneNumberId || '';
+  }
+
+  async function saveSettings(section) {
+    const body = {};
+    if (section === 'store') {
+      body.storeName = document.getElementById('s_storeName').value.trim();
+      body.username = document.getElementById('s_username').value.trim();
+      body.websiteUrl = document.getElementById('s_websiteUrl').value.trim();
+    } else if (section === 'meta') {
+      const t = document.getElementById('s_whatsappToken').value.trim();
+      const p = document.getElementById('s_phoneNumberId').value.trim();
+      const v = document.getElementById('s_verifyToken').value.trim();
+      if (t) body.whatsappToken = t;
+      if (p) body.phoneNumberId = p;
+      if (v) body.verifyToken = v;
+      if (!Object.keys(body).length) { toast('Ingresa al menos un campo para actualizar', 'error'); return; }
+    } else if (section === 'password') {
+      const p1 = document.getElementById('s_password').value;
+      const p2 = document.getElementById('s_password2').value;
+      if (!p1) { toast('Ingresa la nueva contraseña', 'error'); return; }
+      if (p1 !== p2) { toast('Las contraseñas no coinciden', 'error'); return; }
+      body.password = p1;
+    }
+    try {
+      const data = await api('/admin/settings', { method: 'PUT', body: JSON.stringify(body) });
+      if (data.storeName) localStorage.setItem('wsp_store', data.storeName);
+      document.getElementById('navStore').textContent = data.storeName || '';
+      toast('Guardado correctamente');
+      if (section === 'password') { document.getElementById('s_password').value = ''; document.getElementById('s_password2').value = ''; }
+    } catch (ex) { toast(ex.message, 'error'); }
+  }
+
+  // ── ESCAPE ────────────────────────────────────────────────────────────────────
+
+  function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── INIT ──────────────────────────────────────────────────────────────────────
+  loadCatalog();
+</script>
+</body>
+</html>
