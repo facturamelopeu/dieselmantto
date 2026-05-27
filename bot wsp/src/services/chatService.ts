@@ -14,6 +14,7 @@ export interface Conversation {
   botEnabled: boolean;
   unread: number;
   lastTs: number;
+  assignedTo?: string;
 }
 
 // tenantId → phone → Conversation
@@ -69,6 +70,16 @@ export function setBotEnabled(tenantId: string, phone: string, enabled: boolean)
   }
   convs.get(phone)!.botEnabled = enabled;
   broadcast(tenantId, { type: 'bot_toggle', phone, botEnabled: enabled });
+}
+
+export function assignConversation(tenantId: string, phone: string, seller: string | null): void {
+  const convs = getConvMap(tenantId);
+  if (!convs.has(phone)) {
+    convs.set(phone, { phone, messages: [], botEnabled: true, unread: 0, lastTs: Date.now() });
+  }
+  const conv = convs.get(phone)!;
+  conv.assignedTo = seller ?? undefined;
+  broadcast(tenantId, { type: 'assign', phone, assignedTo: seller });
 }
 
 // SSE management

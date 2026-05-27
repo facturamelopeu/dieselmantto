@@ -65,4 +65,10 @@ router.post('/bot/:phone', (req: AuthRequest, res: Response) => {
   res.json({ ok: true });
 });
 
+router.post('/assign/:phone', (req: AuthRequest, res: Response) => {
+  const { seller } = req.body as { seller?: string | null };
+  chatService.assignConversation(req.tenant!.id, req.params.phone, seller ?? null);
+  res.json({ ok: true });
+});
+
 export default router;

@@ -155,6 +155,28 @@ router.post('/scrape', async (req: AuthRequest, res: Response) => {
   }
 });
 
+// ── Vendedores ────────────────────────────────────────────────────────────────
+
+router.get('/sellers', (req: AuthRequest, res: Response) => {
+  res.json(req.tenant!.sellers ?? []);
+});
+
+router.post('/sellers', (req: AuthRequest, res: Response) => {
+  const { name } = req.body as { name?: string };
+  if (!name?.trim()) { res.status(400).json({ error: 'name requerido' }); return; }
+  const current = req.tenant!.sellers ?? [];
+  const trimmed = name.trim();
+  if (current.includes(trimmed)) { res.status(409).json({ error: 'Ya existe' }); return; }
+  const updated = tenantService.update(req.tenant!.id, { sellers: [...current, trimmed] });
+  res.json(updated?.sellers ?? []);
+});
+
+router.delete('/sellers/:name', (req: AuthRequest, res: Response) => {
+  const current = req.tenant!.sellers ?? [];
+  tenantService.update(req.tenant!.id, { sellers: current.filter((s) => s !== req.params.name) });
+  res.json({ ok: true });
+});
+
 // ── WhatsApp QR ───────────────────────────────────────────────────────────────
 
 router.get('/whatsapp/status', (req: AuthRequest, res: Response) => {

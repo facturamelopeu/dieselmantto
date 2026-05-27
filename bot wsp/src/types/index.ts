@@ -40,6 +40,7 @@ export interface Tenant {
   faqs: FAQ[];
   ai?: TenantAI;
   stats?: TenantStats;
+  sellers?: string[];
   createdAt: string;
 }
 
