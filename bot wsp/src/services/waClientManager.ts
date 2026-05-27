@@ -40,6 +40,15 @@ export async function logoutClient(tenantId: string): Promise<void> {
 export function initClient(tenant: Tenant): void {
   if (entries.has(tenant.id)) return;
 
+  // Use system Chromium if available (lighter on VPS), else fall back to bundled
+  const executablePath = (() => {
+    const candidates = ['/usr/bin/chromium-browser', '/usr/bin/chromium', '/usr/bin/google-chrome'];
+    for (const p of candidates) {
+      try { require('fs').accessSync(p); return p; } catch { /* not found */ }
+    }
+    return undefined;
+  })();
+
   const client = new Client({
     authStrategy: new LocalAuth({
       clientId: tenant.id,
@@ -47,6 +56,7 @@ export function initClient(tenant: Tenant): void {
     }),
     puppeteer: {
       headless: true,
+      ...(executablePath ? { executablePath } : {}),
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
