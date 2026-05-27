@@ -22,7 +22,17 @@
     .sidebar .nav-icon { color: inherit !important; font-size: 1rem; width: 1.25rem; }
     .sidebar-footer { background: #1e293b !important; border-top: 1px solid #334155 !important; }
     .header { background: #1e293b !important; border-bottom: 1px solid #334155 !important; }
+    html, body { height: 100%; overflow: hidden; }
     body, .wrapper, .body { background: #0f172a !important; }
+    .app-shell { display: flex; height: 100vh; }
+    .sidebar { width: 256px !important; flex-shrink: 0 !important; height: 100vh !important; overflow-y: auto !important; position: relative !important; transition: transform .25s !important; }
+    .wrapper { flex: 1 !important; min-width: 0 !important; height: 100vh !important; overflow-y: auto !important; display: flex !important; flex-direction: column !important; margin-left: 0 !important; }
+    @media (max-width: 991px) {
+      .sidebar { position: fixed !important; top: 0; left: 0; z-index: 1050; transform: translateX(-100%); }
+      .sidebar.sb-open { transform: translateX(0); }
+      .sb-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1049; display: none; }
+      .sb-overlay.show { display: block; }
+    }
     /* Tab content */
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
@@ -83,10 +93,12 @@
     }
   </style>
 </head>
-<body class="sidebar-lg-show">
+<body>
+<div class="app-shell">
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
 
 <!-- ── SIDEBAR ─────────────────────────────────────────────────────────── -->
-<div class="sidebar sidebar-dark sidebar-fixed" id="sidebar">
+<div class="sidebar sidebar-dark" id="sidebar">
   <div class="sidebar-brand d-flex align-items-center px-3 py-3 gap-2">
     <i class="bi bi-lightning-fill" style="color:var(--primary-soft);font-size:1.2rem"></i>
     <span class="fw-bold" style="color:var(--primary-soft)">Super Admin</span>
@@ -124,10 +136,10 @@
 </div>
 
 <!-- ── WRAPPER ────────────────────────────────────────────────────────── -->
-<div class="wrapper d-flex flex-column min-vh-100">
-  <header class="header header-sticky p-0">
+<div class="wrapper" id="mainWrapper">
+  <header class="header header-sticky p-0" style="flex-shrink:0">
     <div class="container-fluid border-bottom px-3 d-flex align-items-center" style="border-color:#334155!important;height:56px">
-      <button class="header-toggler me-2" type="button" data-coreui-toggle="sidebar" data-coreui-target="#sidebar">
+      <button class="header-toggler me-2" type="button" onclick="toggleSidebar()">
         <span class="header-toggler-icon"></span>
       </button>
       <span class="fw-semibold" style="font-size:14px;color:var(--primary-soft)">Panel de Administración</span>
@@ -380,7 +392,8 @@
       </div>
     </div>
   </div>
-</div>
+</div><!-- /wrapper -->
+</div><!-- /app-shell -->
 
 <div id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@coreui/coreui@5/dist/js/coreui.bundle.min.js"></script>
@@ -390,6 +403,19 @@ if (!saToken) location.href = '/superadmin-login.html';
 
 let tenants = [], editingId = null, subTenantId = null;
 let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+
+// ── SIDEBAR TOGGLE ─────────────────────────────────────────────────────────
+function toggleSidebar() {
+  if (window.innerWidth >= 992) return;
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sbOverlay');
+  const open = sb.classList.toggle('sb-open');
+  ov.classList.toggle('show', open);
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('sb-open');
+  document.getElementById('sbOverlay').classList.remove('show');
+}
 
 // ── TABS ──────────────────────────────────────────────────────────────────
 function setTab(name) {

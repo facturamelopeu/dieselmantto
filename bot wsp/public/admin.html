@@ -23,13 +23,25 @@
     .sidebar-footer { background: #1e293b !important; border-top: 1px solid #334155 !important; }
     /* Header */
     .header { background: #1e293b !important; border-bottom: 1px solid #334155 !important; }
-    /* Body */
+    /* App layout - flex shell, no position:fixed needed */
+    html, body { height: 100%; overflow: hidden; }
     body, .wrapper, .body { background: #0f172a !important; }
+    .app-shell { display: flex; height: 100vh; }
+    .sidebar { width: 256px !important; flex-shrink: 0 !important; height: 100vh !important; overflow-y: auto !important; position: relative !important; transition: transform .25s !important; }
+    .wrapper { flex: 1 !important; min-width: 0 !important; height: 100vh !important; overflow-y: auto !important; display: flex !important; flex-direction: column !important; margin-left: 0 !important; }
+    /* Mobile sidebar */
+    @media (max-width: 991px) {
+      .sidebar { position: fixed !important; top: 0; left: 0; z-index: 1050; transform: translateX(-100%); }
+      .sidebar.sb-open { transform: translateX(0); }
+      .sb-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1049; display: none; }
+      .sb-overlay.show { display: block; }
+    }
     /* Panels */
     .panel { display: none; }
     .panel.active { display: block; }
     /* Chat mode */
-    #mainBody.chat-mode { padding: 0 !important; overflow: hidden; display: flex; flex-direction: column; }
+    .wrapper.no-scroll { overflow: hidden !important; }
+    #mainBody.chat-mode { padding: 0 !important; overflow: hidden; flex: 1; display: flex; flex-direction: column; }
     #mainBody.chat-mode > #mainContent { padding: 0 !important; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     #mainBody.chat-mode .panel.active { flex: 1; display: flex !important; flex-direction: column; overflow: hidden; }
     /* Chat */
@@ -110,10 +122,12 @@
     }
   </style>
 </head>
-<body class="sidebar-lg-show">
+<body>
+<div class="app-shell">
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
 
 <!-- ── SIDEBAR ─────────────────────────────────────────────────────────────── -->
-<div class="sidebar sidebar-dark sidebar-fixed" id="sidebar">
+<div class="sidebar sidebar-dark" id="sidebar">
   <div class="sidebar-brand d-flex align-items-center px-3 py-3 gap-2">
     <img id="navLogo" src="" alt="" style="width:28px;height:28px;border-radius:6px;object-fit:cover;display:none" />
     <span class="fw-bold fs-6" style="color:var(--primary)">💬 Bot Admin</span>
@@ -169,10 +183,10 @@
 </div>
 
 <!-- ── WRAPPER ────────────────────────────────────────────────────────────── -->
-<div class="wrapper d-flex flex-column min-vh-100">
-  <header class="header header-sticky p-0">
+<div class="wrapper" id="mainWrapper">
+  <header class="header header-sticky p-0" style="flex-shrink:0">
     <div class="container-fluid border-bottom px-3 d-flex align-items-center" style="border-color:#334155!important;height:56px">
-      <button class="header-toggler me-2" type="button" data-coreui-toggle="sidebar" data-coreui-target="#sidebar">
+      <button class="header-toggler me-2" type="button" onclick="toggleSidebar()">
         <span class="header-toggler-icon"></span>
       </button>
       <span class="fw-semibold text-secondary" style="font-size:13px" id="headerStore"></span>
@@ -526,6 +540,7 @@
     </div><!-- /mainContent -->
   </div><!-- /mainBody -->
 </div><!-- /wrapper -->
+</div><!-- /app-shell -->
 
 <!-- ── PRODUCT MODAL ──────────────────────────────────────────────────────── -->
 <div class="modal-overlay" id="productModal">
@@ -674,6 +689,19 @@ async function loadTheme() {
   try { const t = await api('/admin/theme'); if (t.primaryColor) applyTheme(t.primaryColor, true); } catch {}
 }
 
+// ── SIDEBAR TOGGLE ─────────────────────────────────────────────────────────
+function toggleSidebar() {
+  if (window.innerWidth >= 992) return;
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sbOverlay');
+  const open = sb.classList.toggle('sb-open');
+  ov.classList.toggle('show', open);
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('sb-open');
+  document.getElementById('sbOverlay').classList.remove('show');
+}
+
 // ── HELPERS ────────────────────────────────────────────────────────────────
 function logout() { localStorage.clear(); location.href = '/'; }
 function api(path, opts = {}) {
@@ -696,6 +724,7 @@ function showTab(name) {
   document.querySelectorAll('.sidebar .nav-link[data-tab]').forEach(l => l.classList.toggle('active', l.dataset.tab === name));
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
   document.getElementById('mainBody').classList.toggle('chat-mode', name === 'chat');
+  document.getElementById('mainWrapper').classList.toggle('no-scroll', name === 'chat');
   if (name==='stats') loadStats();
   if (name==='chat') initChat();
   if (name==='catalog') loadCatalog();
