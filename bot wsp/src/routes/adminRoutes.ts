@@ -155,6 +155,21 @@ router.post('/scrape', async (req: AuthRequest, res: Response) => {
   }
 });
 
+// ── Tema ──────────────────────────────────────────────────────────────────────
+
+router.get('/theme', (req: AuthRequest, res: Response) => {
+  res.json(req.tenant!.theme ?? { primaryColor: '#25d366' });
+});
+
+router.put('/theme', (req: AuthRequest, res: Response) => {
+  const { primaryColor } = req.body as { primaryColor?: string };
+  if (!primaryColor || !/^#[0-9a-fA-F]{6}$/.test(primaryColor)) {
+    res.status(400).json({ error: 'Color hex inválido (formato: #rrggbb)' }); return;
+  }
+  tenantService.update(req.tenant!.id, { theme: { primaryColor } });
+  res.json({ ok: true, primaryColor });
+});
+
 // ── Vendedores ────────────────────────────────────────────────────────────────
 
 router.get('/sellers', (req: AuthRequest, res: Response) => {

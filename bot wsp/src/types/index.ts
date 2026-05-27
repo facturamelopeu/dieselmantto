@@ -41,6 +41,7 @@ export interface Tenant {
   ai?: TenantAI;
   stats?: TenantStats;
   sellers?: string[];
+  theme?: { primaryColor: string };
   createdAt: string;
 }
 
