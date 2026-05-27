@@ -4,6 +4,8 @@ export interface Product {
   category: string;
   description: string;
   price?: string;
+  url?: string;
+  imageUrl?: string;
   keywords: string[];
   source?: 'manual' | 'scraped';
 }

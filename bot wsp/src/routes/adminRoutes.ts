@@ -1,4 +1,7 @@
 import { Router, Response } from 'express';
+import path from 'path';
+import fs from 'fs';
+import multer from 'multer';
 import { authMiddleware, AuthRequest } from '../middleware/authMiddleware';
 import * as tenantService from '../services/tenantService';
 import * as waManager from '../services/waClientManager';
@@ -6,6 +9,15 @@ import * as scraperService from '../services/scraperService';
 import { hashPassword } from '../services/authService';
 import { DEFAULT_PROMPT_TEMPLATE } from '../services/ollamaService';
 import { Product, FAQ, TenantAI } from '../types';
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 3 * 1024 * 1024 }, // 3 MB max (client already converts to WebP)
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Solo se permiten imágenes') as unknown as null, false);
+  },
+});
 
 const router = Router();
 router.use(authMiddleware);
@@ -61,6 +73,7 @@ router.post('/catalog', (req: AuthRequest, res: Response) => {
     category: p.category,
     description: p.description,
     price: p.price,
+    url: p.url,
     keywords: p.keywords ?? p.name.toLowerCase().split(' '),
     source: 'manual',
   };
@@ -80,6 +93,25 @@ router.put('/catalog/:id', (req: AuthRequest, res: Response) => {
 router.delete('/catalog/:id', (req: AuthRequest, res: Response) => {
   tenantService.removeProduct(req.tenant!.id, req.params.id);
   res.json({ ok: true });
+});
+
+// POST /admin/catalog/:id/image  — upload & save product image as WebP
+router.post('/catalog/:id/image', upload.single('image'), (req: AuthRequest, res: Response) => {
+  const tenant = req.tenant!;
+  const existing = tenant.catalog.find((p) => p.id === req.params.id);
+  if (!existing) { res.status(404).json({ error: 'Producto no encontrado' }); return; }
+  if (!req.file) { res.status(400).json({ error: 'No se recibió imagen' }); return; }
+
+  const uploadsDir = path.join(__dirname, '../../public/uploads');
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+  const filename = `${tenant.id}-${req.params.id}.webp`;
+  fs.writeFileSync(path.join(uploadsDir, filename), req.file.buffer);
+
+  const imageUrl = `/uploads/${filename}?v=${Date.now()}`;
+  const imageUrlStored = `/uploads/${filename}`;
+  tenantService.addProduct(tenant.id, { ...existing, imageUrl: imageUrlStored });
+  res.json({ ok: true, imageUrl });
 });
 
 // ── FAQs ─────────────────────────────────────────────────────────────────────

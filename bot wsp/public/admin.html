@@ -301,6 +301,7 @@
             <table class="table table-dark table-hover mb-0" style="--bs-table-bg:#1e293b;--bs-table-hover-bg:#243147;--bs-table-border-color:#334155">
               <thead>
                 <tr>
+                  <th class="text-secondary fw-semibold small border-0" style="width:48px"></th>
                   <th class="text-secondary fw-semibold small border-0">Nombre</th>
                   <th class="text-secondary fw-semibold small border-0">Categoría</th>
                   <th class="text-secondary fw-semibold small border-0">Precio</th>
@@ -573,11 +574,31 @@
             <label class="form-label text-secondary small mb-1">Palabras clave (separadas por coma)</label>
             <input type="text" class="form-control form-control-sm form-input" id="p_keywords" />
           </div>
+          <div class="col-12">
+            <label class="form-label text-secondary small mb-1">URL del producto</label>
+            <input type="url" class="form-control form-control-sm form-input" id="p_url" placeholder="https://tienda.com/producto" />
+          </div>
+          <div class="col-12">
+            <label class="form-label text-secondary small mb-1">Imagen del producto <span class="text-secondary" style="font-size:10px">(se convierte a WebP ≤300 KB)</span></label>
+            <div id="p_img_preview_wrap" style="display:none;margin-bottom:8px">
+              <img id="p_img_preview" src="" alt="" style="max-height:120px;max-width:100%;border-radius:8px;border:1px solid #334155;object-fit:contain" />
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <label class="btn btn-sm btn-outline-secondary" for="p_img_input" style="cursor:pointer;margin:0">
+                <i class="bi bi-image me-1"></i>Seleccionar imagen
+              </label>
+              <input type="file" id="p_img_input" accept="image/*" class="d-none" onchange="handleImageSelect(this)" />
+              <span id="p_img_info" class="text-secondary" style="font-size:11px"></span>
+              <button id="p_img_clear_btn" class="btn btn-sm btn-outline-danger d-none" onclick="clearImage()" type="button">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal-footer" style="border-color:#334155;background:#162032">
         <button class="btn btn-sm btn-outline-secondary" onclick="closeModal('productModal')">Cancelar</button>
-        <button class="btn btn-sm btn-primary-custom" onclick="saveProduct()">Guardar</button>
+        <button class="btn btn-sm btn-primary-custom" id="saveProductBtn" onclick="saveProduct()">Guardar</button>
       </div>
     </div>
   </div>
@@ -756,46 +777,142 @@ async function resetStats() {
 }
 
 // ── CATALOG ────────────────────────────────────────────────────────────────
+let pendingImageBlob = null; // WebP blob waiting to be uploaded
+
 async function loadCatalog() {
   catalog = await api('/admin/catalog');
   document.getElementById('catalogCount').textContent = catalog.length + ' productos';
   const tbody = document.getElementById('catalogBody');
-  if (!catalog.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center text-secondary py-4">Sin productos.</td></tr>'; return; }
+  if (!catalog.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary py-4">Sin productos.</td></tr>'; return; }
   tbody.innerHTML = catalog.map(p => `
     <tr>
       <td>
+        ${p.imageUrl
+          ? `<img src="${esc(p.imageUrl)}?v=${Date.now()}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid #334155" loading="lazy">`
+          : `<div style="width:40px;height:40px;border-radius:6px;background:#0f172a;border:1px dashed #334155;display:flex;align-items:center;justify-content:center"><i class="bi bi-image text-secondary" style="font-size:14px"></i></div>`}
+      </td>
+      <td>
         <div class="fw-semibold">${esc(p.name)}</div>
-        <div class="text-secondary small">${esc(p.description.slice(0,50))}${p.description.length>50?'…':''}</div>
+        <div class="text-secondary small">${esc(p.description.slice(0,60))}${p.description.length>60?'…':''}</div>
+        ${p.url?`<a href="${esc(p.url)}" target="_blank" class="small" style="color:var(--primary);text-decoration:none"><i class="bi bi-link-45deg"></i>${esc(p.url.replace(/^https?:\/\//,'').slice(0,30))}…</a>`:''}
       </td>
       <td><span class="badge bg-secondary">${esc(p.category)}</span></td>
       <td class="text-secondary">${p.price?esc(p.price):'—'}</td>
       <td style="white-space:nowrap">
-        <button class="btn btn-sm btn-outline-secondary" onclick="editProduct('${esc(p.id)}')">Editar</button>
-        <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteProduct('${esc(p.id)}','${esc(p.name)}')">Eliminar</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="editProduct('${esc(p.id)}')"><i class="bi bi-pencil"></i></button>
+        <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteProduct('${esc(p.id)}','${esc(p.name)}')"><i class="bi bi-trash"></i></button>
       </td>
     </tr>`).join('');
   const cats = [...new Set(catalog.map(p=>p.category))];
   document.getElementById('categoryList').innerHTML = cats.map(c=>`<option value="${esc(c)}">`).join('');
 }
+
 function openProductModal(id) {
   editingProductId = id||null;
+  pendingImageBlob = null;
   document.getElementById('productModalTitle').textContent = id?'Editar Producto':'Agregar Producto';
-  if (id) { const p=catalog.find(x=>x.id===id); document.getElementById('p_name').value=p.name; document.getElementById('p_category').value=p.category; document.getElementById('p_price').value=p.price||''; document.getElementById('p_description').value=p.description; document.getElementById('p_keywords').value=(p.keywords||[]).join(', '); }
-  else { ['p_name','p_category','p_price','p_description','p_keywords'].forEach(i=>document.getElementById(i).value=''); }
+  const fields = ['p_name','p_category','p_price','p_description','p_keywords','p_url'];
+  if (id) {
+    const p = catalog.find(x=>x.id===id);
+    document.getElementById('p_name').value = p.name;
+    document.getElementById('p_category').value = p.category;
+    document.getElementById('p_price').value = p.price||'';
+    document.getElementById('p_description').value = p.description;
+    document.getElementById('p_keywords').value = (p.keywords||[]).join(', ');
+    document.getElementById('p_url').value = p.url||'';
+    if (p.imageUrl) {
+      document.getElementById('p_img_preview').src = p.imageUrl+'?v='+Date.now();
+      document.getElementById('p_img_preview_wrap').style.display = '';
+      document.getElementById('p_img_info').textContent = 'Imagen actual';
+      document.getElementById('p_img_clear_btn').classList.remove('d-none');
+    } else {
+      clearImage();
+    }
+  } else {
+    fields.forEach(i=>document.getElementById(i).value='');
+    clearImage();
+  }
+  document.getElementById('p_img_input').value = '';
   openModal('productModal');
 }
+
 function editProduct(id) { openProductModal(id); }
+
+// Convert any image to WebP, auto-adjusting quality to stay under maxKB
+async function toWebP(file, maxKB=300) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const src = URL.createObjectURL(file);
+    img.onload = () => {
+      let w=img.width, h=img.height;
+      const MAX=900;
+      if(w>MAX||h>MAX){ const r=Math.min(MAX/w,MAX/h); w=Math.round(w*r); h=Math.round(h*r); }
+      const canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(src);
+      let q=0.85;
+      const tryBlob=()=>canvas.toBlob(blob=>{
+        if(blob.size>maxKB*1024 && q>0.25){ q=Math.round((q-0.1)*10)/10; tryBlob(); }
+        else resolve(blob);
+      },'image/webp',q);
+      tryBlob();
+    };
+    img.src=src;
+  });
+}
+
+async function handleImageSelect(input) {
+  if(!input.files[0]) return;
+  const file=input.files[0];
+  document.getElementById('p_img_info').textContent='Convirtiendo...';
+  const blob = await toWebP(file);
+  pendingImageBlob = blob;
+  const url = URL.createObjectURL(blob);
+  document.getElementById('p_img_preview').src = url;
+  document.getElementById('p_img_preview_wrap').style.display = '';
+  document.getElementById('p_img_info').textContent = `WebP · ${(blob.size/1024).toFixed(0)} KB`;
+  document.getElementById('p_img_clear_btn').classList.remove('d-none');
+}
+
+function clearImage() {
+  pendingImageBlob = null;
+  document.getElementById('p_img_preview_wrap').style.display = 'none';
+  document.getElementById('p_img_preview').src = '';
+  document.getElementById('p_img_info').textContent = '';
+  document.getElementById('p_img_clear_btn').classList.add('d-none');
+  document.getElementById('p_img_input').value = '';
+}
+
 async function saveProduct() {
   const name=document.getElementById('p_name').value.trim(), category=document.getElementById('p_category').value.trim(), description=document.getElementById('p_description').value.trim();
   if (!name||!category||!description) { toast('Nombre, categoría y descripción requeridos','error'); return; }
   const kw=document.getElementById('p_keywords').value.trim();
   const keywords=kw?kw.split(',').map(s=>s.trim()).filter(Boolean):name.toLowerCase().split(' ');
   const price=document.getElementById('p_price').value.trim()||undefined;
+  const url=document.getElementById('p_url').value.trim()||undefined;
+  const btn=document.getElementById('saveProductBtn');
+  btn.disabled=true; btn.textContent='Guardando...';
   try {
-    if (editingProductId) await api('/admin/catalog/'+editingProductId,{method:'PUT',body:JSON.stringify({name,category,description,keywords,price})});
-    else await api('/admin/catalog',{method:'POST',body:JSON.stringify({name,category,description,keywords,price})});
-    toast(editingProductId?'Actualizado':'Agregado'); closeModal('productModal'); loadCatalog();
+    let saved;
+    if (editingProductId) saved=await api('/admin/catalog/'+editingProductId,{method:'PUT',body:JSON.stringify({name,category,description,keywords,price,url})});
+    else saved=await api('/admin/catalog',{method:'POST',body:JSON.stringify({name,category,description,keywords,price,url})});
+    const productId = saved?.id || editingProductId;
+    if (pendingImageBlob && productId) {
+      btn.textContent='Subiendo imagen...';
+      const fd=new FormData();
+      fd.append('image', pendingImageBlob, 'product.webp');
+      await fetch('/admin/catalog/'+productId+'/image', {
+        method:'POST',
+        headers:{ Authorization:'Bearer '+token },
+        body:fd
+      });
+    }
+    toast(editingProductId?'Actualizado':'Agregado');
+    closeModal('productModal');
+    loadCatalog();
   } catch(ex) { toast(ex.message,'error'); }
+  finally { btn.disabled=false; btn.textContent='Guardar'; }
 }
 async function deleteProduct(id,name) { if(!confirm('¿Eliminar "'+name+'"?')) return; await api('/admin/catalog/'+id,{method:'DELETE'}); toast('Eliminado'); loadCatalog(); }
 function openScrapeModal() { document.getElementById('scrape_url').value=''; document.getElementById('scrape_result').style.display='none'; openModal('scrapeModal'); }
