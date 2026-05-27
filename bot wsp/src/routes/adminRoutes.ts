@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/authMiddleware';
 import * as tenantService from '../services/tenantService';
+import * as waManager from '../services/waClientManager';
 import { hashPassword } from '../services/authService';
 import { Product, FAQ } from '../types';
 
@@ -102,6 +103,33 @@ router.post('/faqs', (req: AuthRequest, res: Response) => {
 // DELETE /admin/faqs/:id
 router.delete('/faqs/:id', (req: AuthRequest, res: Response) => {
   tenantService.removeFaq(req.tenant!.id, parseInt(req.params.id, 10));
+  res.json({ ok: true });
+});
+
+// ── WhatsApp QR ───────────────────────────────────────────────────────────────
+
+// GET /admin/whatsapp/status
+router.get('/whatsapp/status', (req: AuthRequest, res: Response) => {
+  const status = waManager.getStatus(req.tenant!.id);
+  res.json({ status });
+});
+
+// GET /admin/whatsapp/qr
+router.get('/whatsapp/qr', (req: AuthRequest, res: Response) => {
+  const qr = waManager.getQR(req.tenant!.id);
+  if (!qr) { res.status(404).json({ error: 'QR no disponible' }); return; }
+  res.json({ qr });
+});
+
+// POST /admin/whatsapp/connect
+router.post('/whatsapp/connect', (req: AuthRequest, res: Response) => {
+  waManager.initClient(req.tenant!);
+  res.json({ ok: true, message: 'Iniciando conexión. Espera el QR.' });
+});
+
+// POST /admin/whatsapp/logout
+router.post('/whatsapp/logout', async (req: AuthRequest, res: Response) => {
+  await waManager.logoutClient(req.tenant!.id);
   res.json({ ok: true });
 });
 

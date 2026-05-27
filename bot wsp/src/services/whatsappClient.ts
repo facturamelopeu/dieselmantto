@@ -1,20 +1,21 @@
-import axios from 'axios';
 import { Tenant, InteractiveButton, InteractiveListSection } from '../types';
+import { sendText } from './waClientManager';
 
-function headers(token: string) {
-  return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+// Per-user session: tracks the IDs of the last numbered list shown
+// so user can reply with "1", "2", etc.
+const sessionIds = new Map<string, string[]>();
+
+function sessionKey(tenantId: string, to: string): string {
+  return `${tenantId}:${to}`;
 }
 
-function url(phoneNumberId: string) {
-  return `https://graph.facebook.com/v19.0/${phoneNumberId}/messages`;
+export function resolveNumber(tenantId: string, to: string, n: number): string | null {
+  const ids = sessionIds.get(sessionKey(tenantId, to));
+  return ids?.[n - 1] ?? null;
 }
 
 export async function sendTextMessage(tenant: Tenant, to: string, text: string): Promise<void> {
-  await axios.post(
-    url(tenant.phoneNumberId),
-    { messaging_product: 'whatsapp', to, type: 'text', text: { body: text } },
-    { headers: headers(tenant.whatsappToken) }
-  );
+  await sendText(tenant.id, to, text);
 }
 
 export async function sendInteractiveButtons(
@@ -23,22 +24,15 @@ export async function sendInteractiveButtons(
   body: string,
   buttons: InteractiveButton[]
 ): Promise<void> {
-  await axios.post(
-    url(tenant.phoneNumberId),
-    {
-      messaging_product: 'whatsapp',
-      to,
-      type: 'interactive',
-      interactive: {
-        type: 'button',
-        body: { text: body },
-        action: {
-          buttons: buttons.map((b) => ({ type: 'reply', reply: { id: b.id, title: b.title } })),
-        },
-      },
-    },
-    { headers: headers(tenant.whatsappToken) }
-  );
+  const lines = [body, ''];
+  const ids: string[] = [];
+  buttons.forEach((b, i) => {
+    lines.push(`${i + 1}. ${b.title}`);
+    ids.push(b.id);
+  });
+  lines.push('\n_Responde con el número de tu opción._');
+  await sendText(tenant.id, to, lines.join('\n'));
+  sessionIds.set(sessionKey(tenant.id, to), ids);
 }
 
 export async function sendInteractiveList(
@@ -46,22 +40,26 @@ export async function sendInteractiveList(
   to: string,
   header: string,
   body: string,
-  buttonLabel: string,
+  _buttonLabel: string,
   sections: InteractiveListSection[]
 ): Promise<void> {
-  await axios.post(
-    url(tenant.phoneNumberId),
-    {
-      messaging_product: 'whatsapp',
-      to,
-      type: 'interactive',
-      interactive: {
-        type: 'list',
-        header: { type: 'text', text: header },
-        body: { text: body },
-        action: { button: buttonLabel, sections },
-      },
-    },
-    { headers: headers(tenant.whatsappToken) }
-  );
+  const lines: string[] = [];
+  if (header) lines.push(`*${header}*`);
+  if (body) lines.push(body);
+  lines.push('');
+
+  const ids: string[] = [];
+  let n = 1;
+  for (const section of sections) {
+    if (section.title && sections.length > 1) lines.push(`*${section.title}*`);
+    for (const row of section.rows) {
+      const desc = (row as { description?: string }).description;
+      lines.push(`${n}. ${row.title}${desc ? ` _(${desc})_` : ''}`);
+      ids.push(row.id);
+      n++;
+    }
+  }
+  lines.push('\n_Responde con el número de tu opción._');
+  await sendText(tenant.id, to, lines.join('\n').trim());
+  sessionIds.set(sessionKey(tenant.id, to), ids);
 }

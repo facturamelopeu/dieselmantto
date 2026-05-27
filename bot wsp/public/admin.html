@@ -110,6 +110,7 @@
 <div class="tabs">
   <div class="tab active" onclick="showTab('catalog')">Catálogo</div>
   <div class="tab" onclick="showTab('faqs')">FAQs</div>
+  <div class="tab" onclick="showTab('whatsapp')">WhatsApp</div>
   <div class="tab" onclick="showTab('settings')">Configuración</div>
 </div>
 
@@ -161,6 +162,32 @@
         </thead>
         <tbody id="faqBody"></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- WHATSAPP PANEL -->
+  <div class="panel" id="panel-whatsapp">
+    <div class="section-header">
+      <div><h2>Conexión WhatsApp</h2><p>Vincula tu número escaneando el código QR</p></div>
+    </div>
+
+    <div class="settings-card" id="wa-card">
+      <div id="wa-status-row" style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <span id="wa-status-badge" style="padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700">—</span>
+        <span id="wa-status-label" style="color:#94a3b8;font-size:14px"></span>
+      </div>
+
+      <!-- QR container -->
+      <div id="wa-qr-container" style="display:none;text-align:center;margin-bottom:20px">
+        <p style="color:#94a3b8;font-size:13px;margin-bottom:14px">Abre WhatsApp en tu celular → Dispositivos vinculados → Vincular un dispositivo → escanea este código:</p>
+        <img id="wa-qr-img" src="" alt="QR Code" style="width:220px;height:220px;border-radius:10px;border:2px solid #334155" />
+        <p style="color:#64748b;font-size:12px;margin-top:10px">El QR se actualiza automáticamente cada 20 segundos</p>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" id="wa-connect-btn" onclick="waConnect()" style="display:none">Conectar WhatsApp</button>
+        <button class="btn btn-danger" id="wa-logout-btn" onclick="waLogout()" style="display:none">Desconectar</button>
+      </div>
     </div>
   </div>
 
@@ -333,11 +360,13 @@
   }
 
   function showTab(name) {
-    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['catalog','faqs','settings'][i] === name));
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['catalog','faqs','whatsapp','settings'][i] === name));
     document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
     if (name === 'catalog') loadCatalog();
     if (name === 'faqs') loadFaqs();
-    if (name === 'settings') loadSettings();
+    if (name === 'whatsapp') { loadWaStatus(); startWaPolling(); }
+    if (name === 'settings') { stopWaPolling(); loadSettings(); }
+    if (name !== 'whatsapp') stopWaPolling();
   }
 
   function openModal(id) { document.getElementById(id).classList.add('open'); }
@@ -510,6 +539,72 @@
 
   function esc(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── WHATSAPP ──────────────────────────────────────────────────────────────────
+
+  let waPollingTimer = null;
+
+  const WA_COLORS = {
+    connected:    { bg: '#052e16', color: '#4ade80', label: 'Conectado — el bot está activo' },
+    qr:           { bg: '#172554', color: '#60a5fa', label: 'Esperando escaneo del QR...' },
+    initializing: { bg: '#1c1917', color: '#fbbf24', label: 'Iniciando...' },
+    disconnected: { bg: '#1c0a0a', color: '#f87171', label: 'Desconectado' },
+  };
+
+  async function loadWaStatus() {
+    try {
+      const data = await api('/admin/whatsapp/status');
+      const s = data.status || 'disconnected';
+      const c = WA_COLORS[s] || WA_COLORS.disconnected;
+
+      const badge = document.getElementById('wa-status-badge');
+      badge.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+      badge.style.background = c.bg;
+      badge.style.color = c.color;
+      document.getElementById('wa-status-label').textContent = c.label;
+
+      document.getElementById('wa-connect-btn').style.display = s === 'disconnected' ? '' : 'none';
+      document.getElementById('wa-logout-btn').style.display = s === 'connected' ? '' : 'none';
+
+      if (s === 'qr') {
+        await loadWaQR();
+      } else {
+        document.getElementById('wa-qr-container').style.display = 'none';
+      }
+    } catch { /* ignore */ }
+  }
+
+  async function loadWaQR() {
+    try {
+      const data = await api('/admin/whatsapp/qr');
+      if (data?.qr) {
+        document.getElementById('wa-qr-img').src = data.qr;
+        document.getElementById('wa-qr-container').style.display = '';
+      }
+    } catch { /* ignore */ }
+  }
+
+  async function waConnect() {
+    await api('/admin/whatsapp/connect', { method: 'POST' });
+    toast('Iniciando conexión. El QR aparecerá en unos segundos...');
+    loadWaStatus();
+  }
+
+  async function waLogout() {
+    if (!confirm('¿Desconectar WhatsApp? El bot dejará de responder.')) return;
+    await api('/admin/whatsapp/logout', { method: 'POST' });
+    toast('WhatsApp desconectado');
+    loadWaStatus();
+  }
+
+  function startWaPolling() {
+    stopWaPolling();
+    waPollingTimer = setInterval(loadWaStatus, 5000);
+  }
+
+  function stopWaPolling() {
+    if (waPollingTimer) { clearInterval(waPollingTimer); waPollingTimer = null; }
   }
 
   // ── INIT ──────────────────────────────────────────────────────────────────────
